@@ -1,4 +1,5 @@
-﻿using Messenger.API.Contracts;
+﻿using AutoMapper;
+using Messenger.API.Contracts;
 using Messenger.Application.Services;
 using Messenger.Core.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -13,10 +14,13 @@ namespace Messenger.API.Controllers
 	{
 		private readonly IUserService _userService;
 		private readonly IHttpContextAccessor _context;
-		public UsersController(IUserService userService, IHttpContextAccessor context)
+		private readonly IMapper _mapper;
+
+		public UsersController(IUserService userService, IHttpContextAccessor context, IMapper mapper)
 		{
 			_userService = userService;
 			_context = context;
+			_mapper = mapper;
 		}
 
 		[HttpPost("register")]
@@ -43,6 +47,18 @@ namespace Messenger.API.Controllers
 
 			LoginUserResponse respons = new LoginUserResponse(cortage.user,cortage.token);
 			return Ok(respons);
+		}
+
+		[HttpPost("SearchUser")]
+		public async Task<ActionResult<List<UserResponse>>> SearchUserByUserName([FromBody] string searchChat)
+		{
+			var users = await _userService.SearchByUserName(searchChat);
+
+			if (users == null)
+				return BadRequest(new { message = "User name is incorrect " });
+
+			var response = _mapper.Map<List<UserResponse>>(users);
+			return Ok(response);
 		}
 	}
 }

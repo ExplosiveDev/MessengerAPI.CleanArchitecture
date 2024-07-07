@@ -15,6 +15,7 @@ namespace Messenger.DataAccess.Mapping
         public DataBaseMapping()
         {
 			CreateMap<UserEntity, User>().ReverseMap();
+
 			CreateMap<string, RoleEntity>()
 				.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src))
 				.ForMember(dest => dest.Id, opt => opt.Ignore());
@@ -23,6 +24,7 @@ namespace Messenger.DataAccess.Mapping
 				.ConvertUsing(src => src.Name);
 
 			CreateMap<MessageEntity, Message>().ReverseMap();
+			CreateMap<ChatEntity, Chat>().ReverseMap();
 
 		}
     }

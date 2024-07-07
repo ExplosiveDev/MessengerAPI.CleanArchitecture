@@ -6,6 +6,7 @@ using Messenger.DataAccess;
 using Messenger.Infrastructure;
 using Microsoft.AspNetCore.CookiePolicy;
 using Messenger.API.Hubs;
+using Messenger.API.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,7 @@ builder.Services.AddDataAccess(builder.Configuration);
 
 //Mappers
 builder.Services.AddAutoMapper(typeof(DataBaseMapping));
+builder.Services.AddAutoMapper(typeof(ContractsMapping));
 
 builder.Services.AddCors(options =>
 {

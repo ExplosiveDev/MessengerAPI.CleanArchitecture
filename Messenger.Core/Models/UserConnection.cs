@@ -1,4 +1,6 @@
-﻿namespace Messenger.API.Hubs
+﻿using Messenger.Core.Models;
+
+namespace Messenger.API.Hubs
 {
-	public record UserConnection(string Phone, string userName, string chatRoom);
+	public record UserConnection(User User, string chatRoom);
 }

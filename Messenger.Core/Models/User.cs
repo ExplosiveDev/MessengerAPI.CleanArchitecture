@@ -16,7 +16,7 @@ namespace Messenger.Core.Models
 		public User()
 		{
 		}
-		private User(Guid id, string userName, string phone, string hashedPassword, ICollection<string> roles, ICollection<Message> products)
+		private User(Guid id, string userName, string phone, string hashedPassword, ICollection<string> roles, ICollection<Message> products, ICollection<Chat> chats)
         {
             Id = id;
             UserName = userName;
@@ -24,15 +24,20 @@ namespace Messenger.Core.Models
             Phone = phone;
             Roles = roles;
 			Messages = products;
+			Chats = chats;
         }
         public Guid Id { get; set; }
-		public string UserName { get; private set; }
-		public string PasswordHash { get; private set; }
-		public string Phone { get; private set; }
-		public ICollection<string> Roles { get; private set; } = [];
-		public ICollection<Message> Messages { get; private set; } = [];
+		public string UserName { get; set; }
+		public string PasswordHash { get;  set; }
+		public string Phone { get;  set; }
+		public ICollection<string> Roles { get;  set; } = [];
 
-		public static (User User, string Error) Create(Guid id, string userName, string phone, string hashedPassword, ICollection<string> roles, ICollection<Message> products)
+		[JsonIgnore]
+		public ICollection<Message> Messages { get;  set; } = [];
+		[JsonIgnore]
+		public ICollection<Chat> Chats { get;  set; } = [];
+
+		public static (User User, string Error) Create(Guid id, string userName, string phone, string hashedPassword, ICollection<string> roles, ICollection<Message> products, ICollection<Chat> chats)
 		{
 			var error = string.Empty;
 
@@ -42,7 +47,7 @@ namespace Messenger.Core.Models
 			if (!IsValidPhoneNumber(phone))
 				error += "Invalid phone number format\n";
 
-			var user = new User(id, userName, phone, hashedPassword, roles, products);
+			var user = new User(id, userName, phone, hashedPassword, roles, products,chats);
 
 			return (user, error);
 		}

@@ -27,7 +27,7 @@ namespace Messenger.Application.Services
 		{
 			var hashedPassword = _passwordHasher.Generate(password);
 
-			var user = User.Create(Guid.NewGuid(), userName, phone, hashedPassword, new[] {"User"}, Array.Empty<Message>());
+			var user = User.Create(Guid.NewGuid(), userName, phone, hashedPassword, new[] {"User"}, [], []);
 
 			if (user.Error == string.Empty)
 				await _userRepository.Add(user.User);
@@ -48,7 +48,7 @@ namespace Messenger.Application.Services
 
 			var token = _jwtProvider.GenerateToken(user);
 
-			return (User.Create(user.Id,user.UserName,user.Phone,"password", user.Roles, user.Messages).User, token);
+			return (User.Create(user.Id,user.UserName,user.Phone,"password", user.Roles, user.Messages, user.Chats).User, token);
 		}
 		public async Task<bool> IsUniquePhone(string phone)
 		{
@@ -58,6 +58,10 @@ namespace Messenger.Application.Services
 		public async Task<User> GetById(Guid userId)
 		{
 			return await _userRepository.GetById(userId);
+		}
+		public async Task<List<User>> SearchByUserName(string userName)
+		{
+			return await _userRepository.SearchByUserName(userName);
 		}
 	}
 }

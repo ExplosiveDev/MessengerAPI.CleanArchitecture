@@ -56,7 +56,7 @@ namespace Messenger.DataAccess.Repositories
 
 
 			if (userEntity != null)
-				return User.Create(userEntity.Id, userEntity.UserName, userEntity.Phone, userEntity.PasswordHash, roles, []/*_mapper.Map<ICollection<Product>>(userEntity.Products)*/).User;
+				return User.Create(userEntity.Id, userEntity.UserName, userEntity.Phone, userEntity.PasswordHash, roles, []/*_mapper.Map<ICollection<Product>>(userEntity.Products)*/, []).User;
 
 			return null;
 		}
@@ -72,7 +72,7 @@ namespace Messenger.DataAccess.Repositories
 				roles.Add(role.Name);
 
 			if (userEntity != null)
-				return User.Create(userEntity.Id, userEntity.UserName, userEntity.Phone, userEntity.PasswordHash, roles, []/*_mapper.Map<ICollection<Product>>(userEntity.Products)*/).User;
+				return User.Create(userEntity.Id, userEntity.UserName, userEntity.Phone, userEntity.PasswordHash, roles, []/*_mapper.Map<ICollection<Product>>(userEntity.Products)*/, []).User;
 
 			return null;
 		}
@@ -83,6 +83,17 @@ namespace Messenger.DataAccess.Repositories
 				.FirstOrDefaultAsync(x => x.Phone == phone);
 			if (user != null) return false;
 			else return true;
+		}
+
+		public async Task<List<User>> SearchByUserName(string userName)
+		{
+			var userEntity = _context.Users
+					.AsNoTracking()
+					.Where(x => x.UserName.Contains(userName))
+					.ToList();
+
+			var mapped = _mapper.Map<List<User>>(userEntity);
+			return mapped;
 		}
 	}
 }

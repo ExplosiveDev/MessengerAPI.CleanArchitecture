@@ -23,10 +23,8 @@ namespace Messenger.API.Hubs
 
 			connections.Add(Context.ConnectionId, stringConnection);
 
-			await Clients.Group(connection.chatRoom).ReceiveMessage(Message.Create(Guid.NewGuid(),
-				$"{connection.Phone} connected to the chat",
-				Guid.NewGuid(),
-				User.Create(Guid.NewGuid(), "Vlad", "+380964674274", "sdfsd", [], []).User, DateTime.UtcNow));
+			await Clients.Group(connection.chatRoom).ReceiveMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} connected to the chat", Guid.NewGuid(),
+				User.Create(Guid.NewGuid(), "Vlad", "+380964674274", "sdfsd", [], [], []).User, DateTime.UtcNow, []));
 		}
 
 		public async Task SendMessage(string message)
@@ -36,10 +34,8 @@ namespace Messenger.API.Hubs
 
 			if (connection is not null)
 			{
-				await Clients.Group(connection.chatRoom).ReceiveMessage(Message.Create(Guid.NewGuid(),
-				$"{connection.Phone} : Write message",
-				Guid.NewGuid(),
-				User.Create(Guid.NewGuid(), "Vlad", "+380964674274", "sdfsd", [], []).User, DateTime.UtcNow));
+				await Clients.Group(connection.chatRoom).ReceiveMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} : Write message", Guid.NewGuid(),
+				User.Create(Guid.NewGuid(), "Vlad", "+380964674274", "sdfsd", [], [], []).User, DateTime.UtcNow, []));
 			}
 		}
 
@@ -53,9 +49,8 @@ namespace Messenger.API.Hubs
 				connections.Remove(Context.ConnectionId);
 				await Groups.RemoveFromGroupAsync(Context.ConnectionId, connection.chatRoom);
 				await Clients.Group(connection.chatRoom).
-					ReceiveMessage(Message.Create(Guid.NewGuid(),
-						$"{connection.Phone} Disconected from {connection.chatRoom}",
-						Guid.NewGuid(),User.Create(Guid.NewGuid(), "Admin", "+380967777777", "sdfsd", [], []).User, DateTime.UtcNow));
+					ReceiveMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} Disconected from {connection.chatRoom}", Guid.NewGuid(),
+					User.Create(Guid.NewGuid(), "Admin", "+380967777777", "sdfsd", [], [], []).User, DateTime.UtcNow, []));
 			}
 		}
 	}
