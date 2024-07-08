@@ -25,6 +25,7 @@ namespace Messenger.DataAccess.Mapping
 
 			CreateMap<MessageEntity, Message>().ReverseMap();
 			CreateMap<ChatEntity, Chat>().ReverseMap();
+			CreateMap<ConnectionEntity, Connection>().ReverseMap();
 
 		}
     }

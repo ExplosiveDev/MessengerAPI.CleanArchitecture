@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Messenger.DataAccess.Entities;
 using Messenger.DataAccess.Seeder;
-using Messenger.DataAccess.Entities;
 using Microsoft.Extensions.Options;
 using Messenger.DataAccess;
 using Messenger.DataAccess.Configuration;
@@ -19,6 +18,7 @@ namespace Messenger.DataAccess
 		public DbSet<RoleEntity> Roles { get; set; }
 		public DbSet<UserRoleEntity> UserRoles { get; set; }
 		public DbSet<MessageEntity> Messages { get; set; }
+		public DbSet<ConnectionEntity> Connections { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

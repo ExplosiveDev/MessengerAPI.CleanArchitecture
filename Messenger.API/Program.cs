@@ -30,6 +30,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 //Message service
 builder.Services.AddScoped<IMessageService, MessageService>();
 
+//Connection service
+builder.Services.AddScoped<IConnectionService, ConnectionService>();
+
 //Jwt provider
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 

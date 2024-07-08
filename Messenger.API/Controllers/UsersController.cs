@@ -60,5 +60,7 @@ namespace Messenger.API.Controllers
 			var response = _mapper.Map<List<UserResponse>>(users);
 			return Ok(response);
 		}
+
+
 	}
 }

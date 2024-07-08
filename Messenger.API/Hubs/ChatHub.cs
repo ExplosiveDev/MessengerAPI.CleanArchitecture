@@ -1,9 +1,9 @@
-﻿using Messenger.Core.Models;
+﻿using Messenger.Application.Services;
+using Messenger.Core.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Messenger.API.Hubs
 {
@@ -13,15 +13,21 @@ namespace Messenger.API.Hubs
 	}
 	public class ChatHub : Hub<IChatClient>
 	{
-		private static Dictionary<string, string> connections = new Dictionary<string, string>();
+		private readonly IConnectionService _connectionService;
 
-		public async Task JoinChat(UserConnection connection)
+        public ChatHub(IConnectionService connectionService)
+        {
+			_connectionService = connectionService;
+
+		}
+
+        public async Task JoinChat(UserConnection connection)
 		{
 
 			await Groups.AddToGroupAsync(Context.ConnectionId, connection.chatRoom);
 			var stringConnection = JsonSerializer.Serialize(connection);
 
-			connections.Add(Context.ConnectionId, stringConnection);
+			await _connectionService.CreateConnection(Context.ConnectionId, stringConnection);
 
 			await Clients.Group(connection.chatRoom).ReceiveMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} connected to the chat", Guid.NewGuid(),
 				User.Create(Guid.NewGuid(), "Vlad", "+380964674274", "sdfsd", [], [], []).User, DateTime.UtcNow, []));
@@ -29,24 +35,26 @@ namespace Messenger.API.Hubs
 
 		public async Task SendMessage(string message)
 		{
-			var stingConnection = connections[Context.ConnectionId];
-			var connection = JsonSerializer.Deserialize<UserConnection>(stingConnection);
+			Connection connections = await _connectionService.GetConnection(Context.ConnectionId);
+
+			var connection = JsonSerializer.Deserialize<UserConnection>(connections.StingConnection);
 
 			if (connection is not null)
 			{
-				await Clients.Group(connection.chatRoom).ReceiveMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} : Write message", Guid.NewGuid(),
+				await Clients.Group(connection.chatRoom).ReceiveMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} : {message}", Guid.NewGuid(),
 				User.Create(Guid.NewGuid(), "Vlad", "+380964674274", "sdfsd", [], [], []).User, DateTime.UtcNow, []));
 			}
 		}
 
 		public override async Task OnDisconnectedAsync(Exception? exception)
 		{
-			var stingConnection = connections[Context.ConnectionId];
-			var connection = JsonSerializer.Deserialize<UserConnection>(stingConnection);
+            Connection connections = await _connectionService.GetConnection(Context.ConnectionId);
+
+			var connection = JsonSerializer.Deserialize<UserConnection>(connections.StingConnection);
 
 			if (connection is not null)
 			{
-				connections.Remove(Context.ConnectionId);
+				await _connectionService.DeleteConnection(Context.ConnectionId);
 				await Groups.RemoveFromGroupAsync(Context.ConnectionId, connection.chatRoom);
 				await Clients.Group(connection.chatRoom).
 					ReceiveMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} Disconected from {connection.chatRoom}", Guid.NewGuid(),

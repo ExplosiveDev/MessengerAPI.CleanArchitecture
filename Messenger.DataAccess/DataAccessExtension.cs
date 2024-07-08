@@ -27,6 +27,7 @@ namespace Messenger.DataAccess
 			services.AddTransient<ProductStoreDBcontext>();
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IMessageRepository, MessageRepository>();
+			services.AddScoped<IConnectionRepository, ConnectionRepository>();
 
 			return services;
 		}
