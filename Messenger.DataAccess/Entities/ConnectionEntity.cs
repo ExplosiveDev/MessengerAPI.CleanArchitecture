@@ -9,6 +9,7 @@ namespace Messenger.DataAccess.Entities
 {
 	public class ConnectionEntity
 	{
+		public Guid UserId { get; set; }
 		public string ConnectionId { get; set; } = string.Empty;
 		public string stingConnection { get; set; } = string.Empty;
 

@@ -4,6 +4,7 @@ using Messenger.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messenger.DataAccess.Migrations
 {
     [DbContext(typeof(ProductStoreDBcontext))]
-    partial class ProductStoreDBcontextModelSnapshot : ModelSnapshot
+    [Migration("20240825202034_correct-connection")]
+    partial class correctconnection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -105,78 +108,6 @@ namespace Messenger.DataAccess.Migrations
                     b.HasIndex("SenderId");
 
                     b.ToTable("Messages");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("3ef67504-47b1-4845-9f82-7b6a9fb4a9c8"),
-                            Content = "Hello, how are you?",
-                            SenderId = new Guid("6c0136a2-48d9-450f-9814-5cba270dce14"),
-                            Timestamp = new DateTime(2024, 9, 11, 17, 35, 46, 937, DateTimeKind.Utc).AddTicks(8844)
-                        },
-                        new
-                        {
-                            Id = new Guid("1e4e73c2-a504-4712-90fa-d6e8e6d52ff8"),
-                            Content = "I'm good, thanks!",
-                            SenderId = new Guid("57322de4-860d-4c50-950a-0e88f87d096c"),
-                            Timestamp = new DateTime(2024, 9, 11, 17, 35, 46, 937, DateTimeKind.Utc).AddTicks(8856)
-                        },
-                        new
-                        {
-                            Id = new Guid("9b78db7c-edbe-4dbe-8dee-d8bb3ea5da6f"),
-                            Content = "What's new?",
-                            SenderId = new Guid("6c0136a2-48d9-450f-9814-5cba270dce14"),
-                            Timestamp = new DateTime(2024, 9, 11, 17, 35, 46, 937, DateTimeKind.Utc).AddTicks(8859)
-                        },
-                        new
-                        {
-                            Id = new Guid("75fe4719-48b8-42ab-933d-b3f6bf579b9d"),
-                            Content = "Not much, just working on a project.",
-                            SenderId = new Guid("57322de4-860d-4c50-950a-0e88f87d096c"),
-                            Timestamp = new DateTime(2024, 9, 11, 17, 35, 46, 937, DateTimeKind.Utc).AddTicks(8861)
-                        },
-                        new
-                        {
-                            Id = new Guid("2b22fbc4-6301-4db3-9949-14cdd5a38dbb"),
-                            Content = "Sounds interesting, tell me more!",
-                            SenderId = new Guid("6c0136a2-48d9-450f-9814-5cba270dce14"),
-                            Timestamp = new DateTime(2024, 9, 11, 17, 35, 46, 937, DateTimeKind.Utc).AddTicks(8864)
-                        },
-                        new
-                        {
-                            Id = new Guid("d3902c3e-6bdf-4da9-9e6f-09b4a3218e61"),
-                            Content = "It's a web app with a real-time chat feature.",
-                            SenderId = new Guid("57322de4-860d-4c50-950a-0e88f87d096c"),
-                            Timestamp = new DateTime(2024, 9, 11, 17, 35, 46, 937, DateTimeKind.Utc).AddTicks(8867)
-                        },
-                        new
-                        {
-                            Id = new Guid("5ba7dd78-8f92-4813-b769-4e659d6f2eb2"),
-                            Content = "Cool! What stack are you using?",
-                            SenderId = new Guid("6c0136a2-48d9-450f-9814-5cba270dce14"),
-                            Timestamp = new DateTime(2024, 9, 11, 17, 35, 46, 937, DateTimeKind.Utc).AddTicks(8869)
-                        },
-                        new
-                        {
-                            Id = new Guid("11345435-d057-43ad-b53e-77adc98576aa"),
-                            Content = "I'm using ASP.NET Core for the backend and React for the frontend.",
-                            SenderId = new Guid("57322de4-860d-4c50-950a-0e88f87d096c"),
-                            Timestamp = new DateTime(2024, 9, 11, 17, 35, 46, 937, DateTimeKind.Utc).AddTicks(8872)
-                        },
-                        new
-                        {
-                            Id = new Guid("3721ad3c-133b-43fd-9e2b-920f350ec83e"),
-                            Content = "Nice choice! Let me know if you need help.",
-                            SenderId = new Guid("6c0136a2-48d9-450f-9814-5cba270dce14"),
-                            Timestamp = new DateTime(2024, 9, 11, 17, 35, 46, 937, DateTimeKind.Utc).AddTicks(8878)
-                        },
-                        new
-                        {
-                            Id = new Guid("2ddf1249-8109-49a5-af72-3d821357cd9a"),
-                            Content = "Thanks! I'll keep that in mind.",
-                            SenderId = new Guid("57322de4-860d-4c50-950a-0e88f87d096c"),
-                            Timestamp = new DateTime(2024, 9, 11, 17, 35, 46, 937, DateTimeKind.Utc).AddTicks(8880)
-                        });
                 });
 
             modelBuilder.Entity("Messenger.DataAccess.Entities.RoleEntity", b =>
@@ -253,42 +184,42 @@ namespace Messenger.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("dc9fc5a8-bde2-4174-a38d-16c928a76628"),
+                            Id = new Guid("a248c062-819b-4a1f-87d7-be0d354f6862"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380961111111",
                             UserName = "John Doe"
                         },
                         new
                         {
-                            Id = new Guid("8deba114-fef7-401b-8280-b46101234bd3"),
+                            Id = new Guid("9608fbda-4b7b-4610-871c-7b95f9a0ced9"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380962222222",
                             UserName = "Jane Smith"
                         },
                         new
                         {
-                            Id = new Guid("9f853e95-39fe-4628-a6c1-97244d1f218e"),
+                            Id = new Guid("0240bc5b-04f1-4fcd-8f07-9863110c3d84"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380963333333",
                             UserName = "Alice Johnson"
                         },
                         new
                         {
-                            Id = new Guid("a629cd1a-7dc6-4416-980e-117f14b5785e"),
+                            Id = new Guid("6900d124-517a-4b7f-98e9-9e32910bdee7"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380964444444",
                             UserName = "Bob Brown"
                         },
                         new
                         {
-                            Id = new Guid("3657040b-cc63-47d7-a01f-9433854cb056"),
+                            Id = new Guid("92e8b77d-dc4c-43ce-9c22-4a89f5458db2"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380965555555",
                             UserName = "Charlie Davis"
                         },
                         new
                         {
-                            Id = new Guid("9d8f6531-0856-43d1-ae37-cb20ae9a6494"),
+                            Id = new Guid("f251a53c-5a87-4e39-8d0b-577d4e0d9eb0"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380966666666",
                             UserName = "David Evans"

@@ -17,14 +17,19 @@ namespace Messenger.Application.Services
 			_connectionRepository = connectionRepository;
 		}
 
-		public async Task CreateConnection(string connectionId, string stringConnection)
+		public async Task CreateConnection(Guid userId, string connectionId, string stringConnection)
 		{
-			await _connectionRepository.CreateConnection(Connection.Create(connectionId, stringConnection));
+			await _connectionRepository.CreateConnection(Connection.Create(userId, connectionId, stringConnection));
 		}
 
-		public async Task DeleteConnection(string connectionId)
+		public async Task DeleteConnection(Guid userId)
 		{
-			await _connectionRepository.DeleteConnection(connectionId);
+			await _connectionRepository.DeleteConnection(userId);
+		}
+
+		public async Task<Connection> GetConnection(Guid userId)
+		{
+			return await _connectionRepository.GetConnection(userId);
 		}
 
 		public async Task<Connection> GetConnection(string connectionId)

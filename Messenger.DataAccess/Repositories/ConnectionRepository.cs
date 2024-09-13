@@ -22,15 +22,30 @@ namespace Messenger.DataAccess.Repositories
 
 		public async Task CreateConnection(Connection connection)
 		{
-			var connectionEntity = _mapper.Map<ConnectionEntity>(connection);
+			var connectionEntity = await _context.Connections
+					.FirstOrDefaultAsync(c => c.UserId == connection.UserId);
 
-			_context.Connections.Add(connectionEntity);
+			if (connectionEntity != null)
+			{
+				// Якщо потрібно оновити інші поля
+				// Оновлюйте лише ті, що не є PK
+				_context.Connections.Remove(connectionEntity); // Видалення старого запису
+				connectionEntity = _mapper.Map<ConnectionEntity>(connection); // Створення нового з новим ConnectionId
+				_context.Connections.Add(connectionEntity); // Додавання нового запису
+			}
+			else
+			{
+				connectionEntity = _mapper.Map<ConnectionEntity>(connection);
+				_context.Connections.Add(connectionEntity);
+			}
+
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task DeleteConnection(string connectionId)
+
+		public async Task DeleteConnection(Guid userId)
 		{
-			var connectionEntity = await _context.Connections.FindAsync(connectionId);
+			var connectionEntity = _context.Connections.FirstOrDefault(x => x.UserId == userId);
 			if (connectionEntity != null)
 			{
 				_context.Connections.Remove(connectionEntity);
@@ -38,9 +53,15 @@ namespace Messenger.DataAccess.Repositories
 			}
 		}
 
+		public async Task<Connection> GetConnection(Guid userId)
+		{
+			var connectionEntity = _context.Connections.FirstOrDefault(x => x.UserId == userId); 
+			return _mapper.Map<Connection>(connectionEntity);
+		}
+
 		public async Task<Connection> GetConnection(string connectionId)
 		{
-			var connectionEntity = await _context.Connections.FindAsync(connectionId);	
+			var connectionEntity = _context.Connections.FirstOrDefault(x => x.ConnectionId == connectionId);
 			return _mapper.Map<Connection>(connectionEntity);
 		}
 	}

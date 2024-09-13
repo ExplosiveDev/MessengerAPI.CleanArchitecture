@@ -5,8 +5,10 @@ namespace Messenger.Application.Services
 {
 	public interface IConnectionService
 	{
-		Task CreateConnection(string connectionId, string stringConnection);
-		Task DeleteConnection(string connectionId);
+		Task CreateConnection(Guid userId, string connectionId, string stringConnection);
+		Task DeleteConnection(Guid userId);
+		Task<Connection> GetConnection(Guid userId);
 		Task<Connection> GetConnection(string connectionId);
+
 	}
 }
