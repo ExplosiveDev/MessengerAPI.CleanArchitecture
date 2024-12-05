@@ -36,6 +36,6 @@ namespace Messenger.Application.Services
 		{
 			return await _connectionRepository.GetConnection(connectionId);
 		}
-		//aa
+
 	}
 }

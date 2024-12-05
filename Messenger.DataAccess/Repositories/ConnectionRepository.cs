@@ -31,12 +31,12 @@ namespace Messenger.DataAccess.Repositories
 				// Оновлюйте лише ті, що не є PK
 				_context.Connections.Remove(connectionEntity); // Видалення старого запису
 				connectionEntity = _mapper.Map<ConnectionEntity>(connection); // Створення нового з новим ConnectionId
-				_context.Connections.Add(connectionEntity); // Додавання нового запису
+				await _context.Connections.AddAsync(connectionEntity); // Додавання нового запису
 			}
 			else
 			{
 				connectionEntity = _mapper.Map<ConnectionEntity>(connection);
-				_context.Connections.Add(connectionEntity);
+                await _context.Connections.AddAsync(connectionEntity);
 			}
 
 			await _context.SaveChangesAsync();

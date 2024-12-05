@@ -19,7 +19,7 @@ namespace Messenger.DataAccess.Repositories
 		public async Task Add(Message message)
 		{
 			var messageEntity = _mapper.Map<MessageEntity>(message);
-			await _context.Messages.AddAsync(messageEntity);
+            await _context.Messages.AddAsync(messageEntity);
 			await _context.SaveChangesAsync();
 		}
 		public async Task<List<Message>> Get()

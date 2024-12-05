@@ -8,14 +8,16 @@ namespace Messenger.Core.Models
         {
             
         }
-        protected Message(Guid id, string content, Guid userId, User user, DateTime timestamp, ICollection<Chat> chats)
+        protected Message(Guid id, string content, Guid userId, Guid receiverId, User user, User reveiver, DateTime timestamp, ICollection<Chat> chats)
 		{
 			Id = id;
 			Content = content;
 			Timestamp = timestamp;
+            ReceiverId = receiverId;
 			SenderId = userId;
 			Sender = user;
-			Chats = chats;
+            Receive = reveiver;
+            Chats = chats;
 		}
 
 		public Guid Id { get; set; }
@@ -23,12 +25,14 @@ namespace Messenger.Core.Models
 		public DateTime Timestamp { get; set; }
 
 		public Guid SenderId { get; set; }
+		public Guid ReceiverId { get; set; }
 		public User Sender { get; set; }
+		public User Receive { get; set; }
 		public ICollection<Chat> Chats { get; set; } = [];
 
-		public static Message Create(Guid id, string content, Guid userId, User user, DateTime timestamp, ICollection<Chat> chats)
+		public static Message Create(Guid id, string content, Guid userId, Guid receiverId, User user, User reveiver, DateTime timestamp, ICollection<Chat> chats)
 		{
-			var message = new Message(id, content, userId, user, timestamp,chats);
+			var message = new Message(id, content, userId, receiverId, user, reveiver, timestamp,chats);
 			return message;
 		}
 	}

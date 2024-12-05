@@ -18,12 +18,13 @@ namespace Messenger.API.Hubs
 	{
 		private readonly IConnectionService _connectionService;
         private readonly IUserService _userService;
+        private readonly IMessageService _messageService;
 
-        public ChatHub(IConnectionService connectionService, IUserService userService)
+        public ChatHub(IConnectionService connectionService, IUserService userService, IMessageService messageService)
         {
 			_connectionService = connectionService;
             _userService = userService;
-
+			_messageService = messageService;
         }
 
         public async Task JoinChat(UserConnection connection)
@@ -34,22 +35,25 @@ namespace Messenger.API.Hubs
 
 			await _connectionService.CreateConnection(connection.User.Id, Context.ConnectionId, stringConnection);
 
-			await Clients.Group(connection.chatRoom).ReceiveSystemMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} connected to the chat", Guid.NewGuid(),
-				User.Create(Guid.NewGuid(), "Vlad", "+380964674274", "sdfsd", [], [], []).User, DateTime.UtcNow, []));
+			await Clients.Group(connection.chatRoom).ReceiveSystemMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} connected to the chat", Guid.NewGuid(), Guid.NewGuid(),
+				User.Create(Guid.NewGuid(), "Vlad", "+380964674274", "sdfsd", [], [], []).User, null, DateTime.UtcNow, []));
 		}
 
 		public async Task SendMessage(sendMessagePayload data)
 		{
 			Connection connection = await _connectionService.GetConnection(Guid.Parse(data.receiverUserId));
-			var user = await _userService.GetById(Guid.Parse(data.senderUserId));
-
+			var sender = await _userService.GetById(Guid.Parse(data.senderUserId));
+			var receiver = await _userService.GetById(connection.UserId);
 
             if (connection is not null)
 			{
-				await Clients.Client(connection.ConnectionId).ReceiveMessage(Message.Create(Guid.NewGuid(), data.message,user.Id,
-				user, DateTime.UtcNow, []), 200);
-                await Clients.Client(Context.ConnectionId).ReceiveMessage(Message.Create(Guid.NewGuid(), data.message, user.Id,
-					user, DateTime.UtcNow, []), 200);
+				var message = Message.Create(Guid.NewGuid(), data.message, sender.Id, receiver.Id, 
+					sender, receiver, DateTime.UtcNow, []);
+
+                await Clients.Client(connection.ConnectionId).ReceiveMessage(message, 200);
+                await Clients.Client(Context.ConnectionId).ReceiveMessage(message, 200);
+
+                //await _messageService.AddMessage(message);
             }
 		}
 
@@ -80,8 +84,8 @@ namespace Messenger.API.Hubs
 				await _connectionService.DeleteConnection(connection.User.Id);
 				await Groups.RemoveFromGroupAsync(Context.ConnectionId, connection.chatRoom);
 				await Clients.Group(connection.chatRoom).
-                    ReceiveSystemMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} Disconected from {connection.chatRoom}", Guid.NewGuid(),
-					User.Create(Guid.NewGuid(), "Admin", "+380967777777", "sdfsd", [], [], []).User, DateTime.UtcNow, []));
+                    ReceiveSystemMessage(Message.Create(Guid.NewGuid(), $"{connection.User.Phone} Disconected from {connection.chatRoom}", Guid.NewGuid(), Guid.NewGuid(),
+                    User.Create(Guid.NewGuid(), "Admin", "+380967777777", "sdfsd", [], [], []).User, null, DateTime.UtcNow, []));
 			}
 		}
 	}

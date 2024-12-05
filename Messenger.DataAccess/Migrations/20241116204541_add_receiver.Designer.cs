@@ -4,6 +4,7 @@ using Messenger.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messenger.DataAccess.Migrations
 {
     [DbContext(typeof(ProductStoreDBcontext))]
-    partial class ProductStoreDBcontextModelSnapshot : ModelSnapshot
+    [Migration("20241116204541_add_receiver")]
+    partial class add_receiver
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
