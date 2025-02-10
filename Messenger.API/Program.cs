@@ -10,6 +10,8 @@ using Messenger.API.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//aaaa
+
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
