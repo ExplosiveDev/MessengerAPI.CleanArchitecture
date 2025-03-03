@@ -9,16 +9,24 @@ namespace Messenger.DataAccess.Configuration
 	{
 		public void Configure(EntityTypeBuilder<MessageEntity> builder)
 		{
-			builder.HasKey(m => m.Id);
+			builder
+				.HasKey(m => m.Id);
 
-			builder.Property(m => m.Content)
+			builder
+				.Property(m => m.Content)
 				.IsRequired();
 
-			builder.HasMany(m => m.Chats)
-				.WithMany(c => c.Messages);
+			builder
+				.HasOne(m => m.Sender)
+				.WithMany()
+				.HasForeignKey(m => m.SenderId)
+				.OnDelete(DeleteBehavior.NoAction);
 
-			builder.HasOne(m => m.Sender)
-				.WithMany(u => u.Messages);
+            builder
+				.HasOne(m => m.Chat)
+				.WithMany(c => c.Messages)
+				.HasForeignKey(m => m.ChatId);
+
 
 			//builder.HasData(
 			//	new MessageEntity

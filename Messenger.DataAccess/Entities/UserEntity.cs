@@ -14,8 +14,7 @@ namespace Messenger.DataAccess.Entities
 		public string PasswordHash { get; set; } = string.Empty;
 		public string Phone { get; set; } = string.Empty;
 
-		public ICollection<RoleEntity> Roles { get; set; } = [];
-		public ICollection<MessageEntity> Messages { get; set; } = [];
-		public ICollection<ChatEntity> Chats { get; set; } = [];
+        public ICollection<UserChatEntity> UserChats { get; set; } = [];
+        public ICollection<RoleEntity> Roles { get; set; } = [];
 	}
 }

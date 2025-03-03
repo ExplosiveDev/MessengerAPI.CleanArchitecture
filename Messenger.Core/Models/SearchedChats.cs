@@ -7,12 +7,9 @@ using Messenger.DataAccess.Entities;
 
 namespace Messenger.Core.Models
 {
-	public class Chat
-	{
-        public Guid Id { get; set; }
-
-		public ICollection<Message> Messages { get; set; } = [];
-		public ICollection<UserChat> UserChats { get; set; } = [];
-
-	}
+    public class SearchedChats
+    {
+        public List<PrivateChat> PrivateChats { get; set; }
+        public List<GroupChat> GroupChats { get; set; }
+    }
 }

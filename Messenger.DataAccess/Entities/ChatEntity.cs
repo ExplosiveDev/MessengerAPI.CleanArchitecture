@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 
 namespace Messenger.DataAccess.Entities
 {
-	public class ChatEntity
+	public abstract class ChatEntity
 	{
 		public Guid Id { get; set; }
-		public string Name { get; set; } = string.Empty;
 
 		public ICollection<MessageEntity> Messages { get; set; } = [];
-		public ICollection<UserEntity> Users { get; set; } = [];
+		public ICollection<UserChatEntity> UserChats { get; set; } = [];
 	}
 }

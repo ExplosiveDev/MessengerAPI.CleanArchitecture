@@ -7,7 +7,7 @@ namespace Messenger.Application.Services
 	{
 		Task CreateConnection(Guid userId, string connectionId, string stringConnection);
 		Task DeleteConnection(Guid userId);
-		Task<Connection> GetConnection(Guid userId);
+        Task<List<Connection>> GetConnections(Guid chatId);
 		Task<Connection> GetConnection(string connectionId);
 
 	}

@@ -19,15 +19,16 @@ namespace Messenger.DataAccess
 		this IServiceCollection services,
 		IConfiguration configuration)
 		{
-			services.AddDbContext<ProductStoreDBcontext>(options =>
+			services.AddDbContext<MessengerStoreDBcontext>(options =>
 			{
-				options.UseSqlServer(configuration.GetConnectionString(nameof(ProductStoreDBcontext)));
+				options.UseSqlServer(configuration.GetConnectionString(nameof(MessengerStoreDBcontext)));
 			});
 
-			services.AddTransient<ProductStoreDBcontext>();
+			services.AddTransient<MessengerStoreDBcontext>();
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IMessageRepository, MessageRepository>();
 			services.AddScoped<IConnectionRepository, ConnectionRepository>();
+			services.AddScoped<IChatRepository, ChatRepository>();
 
 			return services;
 		}

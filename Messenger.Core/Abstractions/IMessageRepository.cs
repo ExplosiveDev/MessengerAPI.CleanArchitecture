@@ -4,7 +4,8 @@ namespace Messenger.DataAccess.Repositories
 {
 	public interface IMessageRepository
 	{
-		Task Add(Message message);
+		Task<Message> Add(string content, Guid chatId, Guid senderId);
 		Task<List<Message>> Get();
-	}
+		Task<List<Message>> GetMessagesByChatId(Guid chatId);
+    }
 }

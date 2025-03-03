@@ -27,9 +27,9 @@ namespace Messenger.Application.Services
 			await _connectionRepository.DeleteConnection(userId);
 		}
 
-		public async Task<Connection> GetConnection(Guid userId)
+		public async Task<List<Connection>> GetConnections(Guid chatId)
 		{
-			return await _connectionRepository.GetConnection(userId);
+			return await _connectionRepository.GetConnections(chatId);
 		}
 
 		public async Task<Connection> GetConnection(string connectionId)

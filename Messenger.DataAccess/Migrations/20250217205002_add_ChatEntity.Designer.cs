@@ -4,16 +4,19 @@ using Messenger.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace Messenger.DataAccess.Migrations
 {
-    [DbContext(typeof(ProductStoreDBcontext))]
-    partial class ProductStoreDBcontextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MessengerStoreDBcontext))]
+    [Migration("20250217205002_add_ChatEntity")]
+    partial class add_ChatEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,49 +25,24 @@ namespace Messenger.DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ChatEntityMessageEntity", b =>
-                {
-                    b.Property<Guid>("ChatsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("MessagesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ChatsId", "MessagesId");
-
-                    b.HasIndex("MessagesId");
-
-                    b.ToTable("ChatEntityMessageEntity");
-                });
-
-            modelBuilder.Entity("ChatEntityUserEntity", b =>
-                {
-                    b.Property<Guid>("ChatsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ChatsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("ChatEntityUserEntity");
-                });
-
             modelBuilder.Entity("Messenger.DataAccess.Entities.ChatEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Discriminator")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Chats");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("ChatEntity");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Messenger.DataAccess.Entities.ConnectionEntity", b =>
@@ -90,12 +68,12 @@ namespace Messenger.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ReceiverId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SenderId")
                         .HasColumnType("uniqueidentifier");
@@ -104,6 +82,8 @@ namespace Messenger.DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
 
                     b.HasIndex("SenderId");
 
@@ -142,6 +122,21 @@ namespace Messenger.DataAccess.Migrations
                             Id = 3,
                             Name = "Seller"
                         });
+                });
+
+            modelBuilder.Entity("Messenger.DataAccess.Entities.UserChatEntity", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "ChatId");
+
+                    b.HasIndex("ChatId");
+
+                    b.ToTable("UserChats");
                 });
 
             modelBuilder.Entity("Messenger.DataAccess.Entities.UserEntity", b =>
@@ -184,42 +179,42 @@ namespace Messenger.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("03e1922e-d3d2-4f42-bfb0-8be990104fee"),
+                            Id = new Guid("c414731a-2ed2-4aae-a6fe-dfd82d4ad4b0"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380961111111",
                             UserName = "John Doe"
                         },
                         new
                         {
-                            Id = new Guid("1290ac4a-7633-4e96-89ed-d6079236cfce"),
+                            Id = new Guid("a27bdbbb-28e7-4c10-a8b6-724eb9f055b8"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380962222222",
                             UserName = "Jane Smith"
                         },
                         new
                         {
-                            Id = new Guid("a3d43ba3-64d7-40e1-8e3f-18be84fe5582"),
+                            Id = new Guid("feda2a2e-b3cf-4ca5-be08-8563a68613f0"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380963333333",
                             UserName = "Alice Johnson"
                         },
                         new
                         {
-                            Id = new Guid("d6e9a275-08b0-4e6d-b319-a1d4fb00a7c5"),
+                            Id = new Guid("f5376788-a2ba-4414-a8f6-21639bc2c91e"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380964444444",
                             UserName = "Bob Brown"
                         },
                         new
                         {
-                            Id = new Guid("a63f6f43-b333-44b2-a801-eb787afc5cf1"),
+                            Id = new Guid("c5f7b554-decb-4250-8514-9a6d22a54862"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380965555555",
                             UserName = "Charlie Davis"
                         },
                         new
                         {
-                            Id = new Guid("694d3d78-4a07-4588-bddb-294ad54bb2cf"),
+                            Id = new Guid("7ee00405-df78-4cf4-8cee-a25dc82cdc1b"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380966666666",
                             UserName = "David Evans"
@@ -266,45 +261,75 @@ namespace Messenger.DataAccess.Migrations
                     b.ToTable("RoleEntityUserEntity");
                 });
 
-            modelBuilder.Entity("ChatEntityMessageEntity", b =>
+            modelBuilder.Entity("Messenger.DataAccess.Entities.GroupChatEntity", b =>
                 {
-                    b.HasOne("Messenger.DataAccess.Entities.ChatEntity", null)
-                        .WithMany()
-                        .HasForeignKey("ChatsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasBaseType("Messenger.DataAccess.Entities.ChatEntity");
 
-                    b.HasOne("Messenger.DataAccess.Entities.MessageEntity", null)
-                        .WithMany()
-                        .HasForeignKey("MessagesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("AdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GroupName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasIndex("AdminId");
+
+                    b.HasDiscriminator().HasValue("GroupChatEntity");
                 });
 
-            modelBuilder.Entity("ChatEntityUserEntity", b =>
+            modelBuilder.Entity("Messenger.DataAccess.Entities.PrivateChatEntity", b =>
                 {
-                    b.HasOne("Messenger.DataAccess.Entities.ChatEntity", null)
-                        .WithMany()
-                        .HasForeignKey("ChatsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasBaseType("Messenger.DataAccess.Entities.ChatEntity");
 
-                    b.HasOne("Messenger.DataAccess.Entities.UserEntity", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("User1Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("User2Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasIndex("User1Id");
+
+                    b.HasIndex("User2Id");
+
+                    b.HasDiscriminator().HasValue("PrivateChatEntity");
                 });
 
             modelBuilder.Entity("Messenger.DataAccess.Entities.MessageEntity", b =>
                 {
-                    b.HasOne("Messenger.DataAccess.Entities.UserEntity", "Sender")
+                    b.HasOne("Messenger.DataAccess.Entities.ChatEntity", "Chat")
                         .WithMany("Messages")
-                        .HasForeignKey("SenderId")
+                        .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Messenger.DataAccess.Entities.UserEntity", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Messenger.DataAccess.Entities.UserChatEntity", b =>
+                {
+                    b.HasOne("Messenger.DataAccess.Entities.ChatEntity", "Chat")
+                        .WithMany("UserChats")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Messenger.DataAccess.Entities.UserEntity", "User")
+                        .WithMany("UserChats")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RoleEntityUserEntity", b =>
@@ -322,9 +347,46 @@ namespace Messenger.DataAccess.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Messenger.DataAccess.Entities.UserEntity", b =>
+            modelBuilder.Entity("Messenger.DataAccess.Entities.GroupChatEntity", b =>
+                {
+                    b.HasOne("Messenger.DataAccess.Entities.UserEntity", "Admin")
+                        .WithMany()
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Admin");
+                });
+
+            modelBuilder.Entity("Messenger.DataAccess.Entities.PrivateChatEntity", b =>
+                {
+                    b.HasOne("Messenger.DataAccess.Entities.UserEntity", "User1")
+                        .WithMany()
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Messenger.DataAccess.Entities.UserEntity", "User2")
+                        .WithMany()
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
+            modelBuilder.Entity("Messenger.DataAccess.Entities.ChatEntity", b =>
                 {
                     b.Navigation("Messages");
+
+                    b.Navigation("UserChats");
+                });
+
+            modelBuilder.Entity("Messenger.DataAccess.Entities.UserEntity", b =>
+                {
+                    b.Navigation("UserChats");
                 });
 #pragma warning restore 612, 618
         }

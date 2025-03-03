@@ -10,9 +10,9 @@ namespace Messenger.DataAccess.Repositories
 {
 	public class UserRepository : IUserRepository
 	{
-		private readonly ProductStoreDBcontext _context;
+		private readonly MessengerStoreDBcontext _context;
 		private readonly IMapper _mapper;
-		public UserRepository(ProductStoreDBcontext context, IMapper mapper)
+		public UserRepository(MessengerStoreDBcontext context, IMapper mapper)
 		{
 			_context = context;
 			_mapper = mapper;
@@ -56,7 +56,7 @@ namespace Messenger.DataAccess.Repositories
 
 
 			if (userEntity != null)
-				return User.Create(userEntity.Id, userEntity.UserName, userEntity.Phone, userEntity.PasswordHash, roles, []/*_mapper.Map<ICollection<Product>>(userEntity.Products)*/, []).User;
+				return User.Create(userEntity.Id, userEntity.UserName, userEntity.Phone, userEntity.PasswordHash, roles, [], []).User;
 
 			return null;
 		}

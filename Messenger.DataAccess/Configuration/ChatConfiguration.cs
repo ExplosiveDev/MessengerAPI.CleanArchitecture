@@ -13,16 +13,20 @@ namespace Messenger.DataAccess.Configuration
 	{
 		public void Configure(EntityTypeBuilder<ChatEntity> builder)
 		{
-			builder.HasKey(x => x.Id);
+			builder
+				.HasKey(c=> c.Id);
 
-			builder.Property(x => x.Name)
-				.IsRequired();
+			builder
+				.HasMany(c => c.Messages)
+				.WithOne(m => m.Chat)
+				.HasForeignKey(m => m.ChatId);
 
-			builder.HasMany(c => c.Messages)
-				  .WithMany(m => m.Chats);
+            builder
+				.HasMany(c => c.UserChats)
+				.WithOne(uc => uc.Chat)
+				.HasForeignKey(uc => uc.ChatId);
 
-			builder.HasMany(c => c.Users)
-				   .WithMany(u => u.Chats);
-		}
-	}
+
+        }
+    }
 }

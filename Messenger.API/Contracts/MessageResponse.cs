@@ -6,6 +6,6 @@ namespace Messenger.API.Contracts
 		Guid Id,
 		Guid SenderId,
 		string Content,
-		DateTime Timestamp,
+		string Timestamp,
 		User Sender);
 }

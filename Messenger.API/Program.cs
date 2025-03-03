@@ -7,10 +7,10 @@ using Messenger.Infrastructure;
 using Microsoft.AspNetCore.CookiePolicy;
 using Messenger.API.Hubs;
 using Messenger.API.Mapping;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//aaaa
 
 builder.Services.AddControllers();
 
@@ -26,6 +26,7 @@ builder.Services.AddApiAuthentication(builder.Configuration);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
 
 
+
 //User service
 builder.Services.AddScoped<IUserService, UserService>();
 
@@ -34,6 +35,9 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 
 //Connection service
 builder.Services.AddScoped<IConnectionService, ConnectionService>();
+
+//Chat service
+builder.Services.AddScoped<IChatService, ChatService>();
 
 //Jwt provider
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
@@ -52,11 +56,12 @@ builder.Services.AddCors(options =>
 {
 	options.AddPolicy("CorsPolicy",
 		builder => builder
-			.WithOrigins("http://localhost:5173")
+			.WithOrigins("http://192.168.0.100:5173")
 			.AllowAnyMethod()
 			.AllowAnyHeader()
 			.AllowCredentials());
 });
+builder.WebHost.UseUrls("http://0.0.0.0:5187");
 builder.Services.AddSignalR();
 
 var app = builder.Build();

@@ -14,9 +14,10 @@ namespace Messenger.DataAccess.Entities
 		public string Content { get; set; } = string.Empty;
 		public DateTime Timestamp { get; set; }
 
-		public Guid SenderId { get; set; }
-        public Guid ReceiverId { get; set; }
+        public Guid SenderId { get; set; }
         public UserEntity Sender { get; set; }
-		public ICollection<ChatEntity> Chats { get; set; } = [];
+
+        public Guid ChatId { get; set; }
+        public ChatEntity Chat { get; set; }
 	}
 }

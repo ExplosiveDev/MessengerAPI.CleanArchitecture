@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Messenger.Core.Models
 {
@@ -8,31 +9,33 @@ namespace Messenger.Core.Models
         {
             
         }
-        protected Message(Guid id, string content, Guid userId, Guid receiverId, User user, User reveiver, DateTime timestamp, ICollection<Chat> chats)
+        protected Message
+			(Guid id, string content, Guid userId, User user, Guid chatId, Chat chat, string timestamp)
 		{
 			Id = id;
 			Content = content;
 			Timestamp = timestamp;
-            ReceiverId = receiverId;
 			SenderId = userId;
 			Sender = user;
-            Receive = reveiver;
-            Chats = chats;
+			ChatId = chatId;
+			Chat = chat;
 		}
 
 		public Guid Id { get; set; }
 		public string Content { get; set; }
-		public DateTime Timestamp { get; set; }
+		public string Timestamp { get; set; }
 
 		public Guid SenderId { get; set; }
-		public Guid ReceiverId { get; set; }
-		public User Sender { get; set; }
-		public User Receive { get; set; }
-		public ICollection<Chat> Chats { get; set; } = [];
+        [JsonIgnore] // або міняти налаштування Json.SerializerSettings -> options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        public User Sender { get; set; }
+        public Guid ChatId { get; set; }
+        [JsonIgnore] // або міняти налаштування Json.SerializerSettings -> options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        public Chat Chat { get; set; }
 
-		public static Message Create(Guid id, string content, Guid userId, Guid receiverId, User user, User reveiver, DateTime timestamp, ICollection<Chat> chats)
+        public static Message Create
+			(Guid id, string content, Guid senderId, User sender, Guid chatId, Chat chat, string timestamp)
 		{
-			var message = new Message(id, content, userId, receiverId, user, reveiver, timestamp,chats);
+			var message = new Message(id, content, senderId, sender, chatId, chat, timestamp);
 			return message;
 		}
 	}

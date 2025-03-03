@@ -12,15 +12,23 @@ namespace Messenger.DataAccess.Repositories
 {
 	public class ConnectionRepository : IConnectionRepository
 	{
-		private readonly ProductStoreDBcontext _context;
+		private readonly MessengerStoreDBcontext _context;
 		private readonly IMapper _mapper;
-		public ConnectionRepository(ProductStoreDBcontext context, IMapper mapper)
+		public ConnectionRepository(MessengerStoreDBcontext context, IMapper mapper)
 		{
 			_context = context;
 			_mapper = mapper;
 		}
+        public async Task<List<User>> GetMessageRecipientsAsync(Guid chatId)
+        {
+            var users = await _context.UserChats
+                .Where(uc => uc.ChatId == chatId)
+                .Select(uc => uc.User)
+                .ToListAsync();
 
-		public async Task CreateConnection(Connection connection)
+            return _mapper.Map<List<User>>(users);			
+        }
+        public async Task CreateConnection(Connection connection)
 		{
 			var connectionEntity = await _context.Connections
 					.FirstOrDefaultAsync(c => c.UserId == connection.UserId);
@@ -53,16 +61,20 @@ namespace Messenger.DataAccess.Repositories
 			}
 		}
 
-		public async Task<Connection> GetConnection(Guid userId)
+		public async Task<List<Connection>> GetConnections(Guid chatId)
 		{
-			var connectionEntity = _context.Connections.FirstOrDefault(x => x.UserId == userId); 
-			return _mapper.Map<Connection>(connectionEntity);
-		}
+            var usersIds = (await GetMessageRecipientsAsync(chatId)).Select(u => u.Id).ToList();
+            var connectionsEntity = await _context.Connections
+				.Where(x => usersIds.Contains(x.UserId))
+				.ToListAsync(); 
+
+            return _mapper.Map<List<Connection>>(connectionsEntity);
+        }
 
 		public async Task<Connection> GetConnection(string connectionId)
 		{
 			var connectionEntity = _context.Connections.FirstOrDefault(x => x.ConnectionId == connectionId);
 			return _mapper.Map<Connection>(connectionEntity);
 		}
-	}
+    }
 }

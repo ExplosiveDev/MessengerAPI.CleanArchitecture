@@ -23,9 +23,14 @@ namespace Messenger.DataAccess.Mapping
 			CreateMap<RoleEntity, string>()
 				.ConvertUsing(src => src.Name);
 
-			CreateMap<MessageEntity, Message>().ReverseMap();
-			CreateMap<ChatEntity, Chat>().ReverseMap();
+			CreateMap<MessageEntity, Message>()
+				.ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => src.Timestamp.ToString("yyyy:MM:dd:HH:mm:ss")))
+				.ReverseMap();
+            CreateMap<ChatEntity, Chat>().ReverseMap();
 			CreateMap<ConnectionEntity, Connection>().ReverseMap();
+			CreateMap<PrivateChatEntity, PrivateChat>().ReverseMap();
+			CreateMap<GroupChatEntity, GroupChat>().ReverseMap();
+			CreateMap<UserChatEntity, UserChat>().ReverseMap();
 
 		}
     }

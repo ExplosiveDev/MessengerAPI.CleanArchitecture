@@ -6,7 +6,8 @@ namespace Messenger.DataAccess.Repositories
 	{
 		Task CreateConnection(Connection connection);
 		Task DeleteConnection(Guid userId);
-		Task<Connection> GetConnection(Guid userId);
+		Task<List<User>> GetMessageRecipientsAsync(Guid chatId);
+        Task<List<Connection>> GetConnections(Guid chatId);
 		Task<Connection> GetConnection(string connectionId);
 	}
 }
