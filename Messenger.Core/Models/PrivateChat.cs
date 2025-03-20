@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Messenger.Core.Models
 {
-    public class PrivateChat 
+    public class PrivateChat : Chat
     {
-        public Guid Id { get; set; }
-        public ICollection<Message> Messages { get; set; } = [];
         public Guid User1Id { get; set; }
         public User User1 { get; set; }
         public Guid User2Id { get; set; }

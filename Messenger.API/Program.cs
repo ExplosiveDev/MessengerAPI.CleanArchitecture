@@ -7,12 +7,15 @@ using Messenger.Infrastructure;
 using Microsoft.AspNetCore.CookiePolicy;
 using Messenger.API.Hubs;
 using Messenger.API.Mapping;
-using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+}); ;
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -27,11 +30,15 @@ builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(nameof(J
 
 
 
+
 //User service
 builder.Services.AddScoped<IUserService, UserService>();
 
 //Message service
 builder.Services.AddScoped<IMessageService, MessageService>();
+
+//File service
+builder.Services.AddScoped<IFileService, FileService>();
 
 //Connection service
 builder.Services.AddScoped<IConnectionService, ConnectionService>();
@@ -54,12 +61,12 @@ builder.Services.AddAutoMapper(typeof(ContractsMapping));
 
 builder.Services.AddCors(options =>
 {
-	options.AddPolicy("CorsPolicy",
-		builder => builder
-			.WithOrigins("http://192.168.0.100:5173")
-			.AllowAnyMethod()
-			.AllowAnyHeader()
-			.AllowCredentials());
+    options.AddPolicy("CorsPolicy",
+        builder => builder
+            .WithOrigins("http://192.168.0.100:5173")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
 });
 builder.WebHost.UseUrls("http://0.0.0.0:5187");
 builder.Services.AddSignalR();
@@ -69,10 +76,11 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-	app.UseSwagger();
-	app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
+app.UseStaticFiles();
 app.UseCors("CorsPolicy");
 app.UseHttpsRedirection();
 
@@ -81,9 +89,9 @@ app.UseAuthorization();
 
 app.UseCookiePolicy(new CookiePolicyOptions
 {
-	MinimumSameSitePolicy = SameSiteMode.Strict,
-	HttpOnly = HttpOnlyPolicy.Always,
-	Secure = CookieSecurePolicy.Always
+    MinimumSameSitePolicy = SameSiteMode.Strict,
+    HttpOnly = HttpOnlyPolicy.Always,
+    Secure = CookieSecurePolicy.Always
 });
 
 app.MapControllers();

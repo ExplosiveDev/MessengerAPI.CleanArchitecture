@@ -12,28 +12,48 @@ namespace Messenger.Application.Services
 	public class MessageService : IMessageService
 	{
 		private readonly IMessageRepository _messageRepository;
-		private readonly IChatRepository _chatRepository;
+        private readonly IFileRepository _fileRepository;
+        private readonly IChatRepository _chatRepository;
 
-		public MessageService(IMessageRepository messageRepository, IChatRepository chatRepository)
+		public MessageService(IMessageRepository messageRepository, IChatRepository chatRepository, IFileRepository fileRepository)
 		{
 			_messageRepository = messageRepository;
 			_chatRepository = chatRepository;
+			_fileRepository = fileRepository;
 		}
 
-		public async Task<Message> AddMessage(string content, Guid chatId, Guid senderId)
+		public async Task<Message> AddMessage(string content, string photoId, Guid chatId, Guid senderId)
 		{
-			return await _messageRepository.Add(content, chatId, senderId);
-		}
+			var message = await _messageRepository.Add(content, chatId, senderId);
+			if (photoId != string.Empty) message = await _fileRepository.AddPhotosToMessage(message.Id, Guid.Parse(photoId));
+
+			return message;
+
+        }
 		public async Task<List<Message>> GetAllMessages()
 		{
 			return await _messageRepository.Get();
 		}
 
-        public Task<List<Message>> GetMessagesByChatId(Guid chatId)
+        public async Task<List<Message>> GetMessagesByChatId(Guid chatId)
         {
 			if(_chatRepository.Get(chatId) is not null)
-				return _messageRepository.GetMessagesByChatId(chatId);
+				return await _messageRepository.GetMessagesByChatId(chatId);
 			return null;
+        }
+
+		public async Task SetIsReaded(List<string> msgIds)
+		{
+			if (msgIds is null) return;
+
+			List<Guid> msgIdsToRead = new List<Guid>();
+			foreach (var msgId in msgIds)
+				msgIdsToRead.Add(Guid.Parse(msgId));
+
+			await _messageRepository.SetIsReaded(msgIdsToRead);
+
+
+		
         }
     }
 }

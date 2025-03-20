@@ -8,9 +8,9 @@ namespace Messenger.DataAccess.Repositories
 {
     public class MessageRepository : IMessageRepository
     {
-        private readonly MessengerStoreDBcontext _context;
+        private readonly MessengerDBcontext _context;
         private readonly IMapper _mapper;
-        public MessageRepository(MessengerStoreDBcontext context, IMapper mapper)
+        public MessageRepository(MessengerDBcontext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -45,6 +45,9 @@ namespace Messenger.DataAccess.Repositories
             await _context.SaveChangesAsync();
             return _mapper.Map<Message>(messageEntity);
         }
+
+
+
         public async Task<List<Message>> Get()
         {
             var messagesEntity = await _context.Messages
@@ -62,6 +65,17 @@ namespace Messenger.DataAccess.Repositories
                 .ToListAsync();
 
             return _mapper.Map<List<Message>>(messagesEntity);
+        }
+
+        public async Task SetIsReaded(List<Guid> ids)
+        {
+            var messagesEntity = await _context.Messages
+                .Where(m => ids.Contains(m.Id))
+                .ToListAsync();
+
+            messagesEntity.ForEach((MessageEntity msg) => { msg.IsReaded = true; });
+            await _context.SaveChangesAsync();
+
         }
     }
 }

@@ -13,6 +13,8 @@ namespace Messenger.Core.Models
 
 		public ICollection<Message> Messages { get; set; } = [];
 		public ICollection<UserChat> UserChats { get; set; } = [];
+		public Message TopMessage { get; set; }
+		public int UnReaded { get; set; }
 
-	}
+    }
 }

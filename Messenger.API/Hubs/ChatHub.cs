@@ -9,10 +9,12 @@ using System.Text.RegularExpressions;
 
 namespace Messenger.API.Hubs
 {
-    public record sendMessagePayload(string content, string senderId, string chatId);
+    public record sendMessagePayload(string content, string photoId, string senderId, string chatId);
+    public record messagesReadedPayload(string chatId, string userId, List<string> messegeIds);
     public interface IChatClient
     {
         public Task ReceiveMessage(Message message, int status);
+        public Task ReceiveReadedMessageIds(IEnumerable<string> ids);
         public Task ReceiveSystemMessage(Message message);
     }
     public class ChatHub : Hub<IChatClient>
@@ -20,12 +22,14 @@ namespace Messenger.API.Hubs
         private readonly IConnectionService _connectionService;
         private readonly IUserService _userService;
         private readonly IMessageService _messageService;
+        private readonly IFileService _fileService;
 
-        public ChatHub(IConnectionService connectionService, IUserService userService, IMessageService messageService)
+       public ChatHub(IConnectionService connectionService, IUserService userService, IMessageService messageService, IFileService fileService)
         {
             _connectionService = connectionService;
             _userService = userService;
             _messageService = messageService;
+            _fileService = fileService;
         }
 
         public async Task JoinChat(UserConnection connection)
@@ -46,10 +50,25 @@ namespace Messenger.API.Hubs
             if (connections is not null)
             {
 
-                var message = await _messageService.AddMessage(data.content, Guid.Parse(data.chatId), Guid.Parse(data.senderId));
+                var message = await _messageService.AddMessage(data.content, data.photoId, Guid.Parse(data.chatId), Guid.Parse(data.senderId));
                 foreach (var connection in connections)
                 {
                     await Clients.Client(connection.ConnectionId).ReceiveMessage(message, 200);
+                }
+            }
+        }
+
+        public async Task MessagesReaded(messagesReadedPayload data)
+        {
+            Guid userId = Guid.Parse(data.userId);
+            List<Connection> connections = await _connectionService.GetConnections(Guid.Parse(data.chatId));
+            if (connections is not null)
+            {
+                await _messageService.SetIsReaded(data.messegeIds);
+                foreach (var connection in connections)
+                {
+                    if(connection.UserId != userId)
+                        await Clients.Client(connection.ConnectionId).ReceiveReadedMessageIds(data.messegeIds);
                 }
             }
         }

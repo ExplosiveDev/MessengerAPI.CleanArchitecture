@@ -7,5 +7,6 @@ namespace Messenger.DataAccess.Repositories
 		Task<Message> Add(string content, Guid chatId, Guid senderId);
 		Task<List<Message>> Get();
 		Task<List<Message>> GetMessagesByChatId(Guid chatId);
+		Task SetIsReaded(List<Guid> ids);
     }
 }

@@ -3,6 +3,7 @@ using Messenger.Application.Services;
 using Messenger.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace Messenger.API.Controllers
 {
@@ -51,6 +52,24 @@ namespace Messenger.API.Controllers
             var savedChats = await _chatService.GetSavedChats(Guid.Parse(userId));
 
             return Ok(savedChats);
+        }
+
+        [Authorize]
+        [HttpPost("CreatePrivateChat")]
+        public async Task<ActionResult<PrivateChat>> CreatePrivateChat([FromQuery] string user2Id)
+        {
+            var userId = User.FindFirst("userId")?.Value;
+
+            if (userId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+            var privateChat = await _chatService.CreatePrivateChat(Guid.Parse(userId), Guid.Parse(user2Id));
+
+            if (privateChat == null) return BadRequest("One or both users do not exist.");
+
+            return privateChat;
+
         }
     }
 }

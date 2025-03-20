@@ -19,5 +19,9 @@ namespace Messenger.DataAccess.Entities
 
         public Guid ChatId { get; set; }
         public ChatEntity Chat { get; set; }
-	}
+
+		public bool IsReaded { get; set; }
+
+        public List<FileEntity> Files { get; set; }
+    }
 }

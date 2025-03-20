@@ -10,9 +10,9 @@ namespace Messenger.DataAccess.Repositories
 {
 	public class UserRepository : IUserRepository
 	{
-		private readonly MessengerStoreDBcontext _context;
+		private readonly MessengerDBcontext _context;
 		private readonly IMapper _mapper;
-		public UserRepository(MessengerStoreDBcontext context, IMapper mapper)
+		public UserRepository(MessengerDBcontext context, IMapper mapper)
 		{
 			_context = context;
 			_mapper = mapper;

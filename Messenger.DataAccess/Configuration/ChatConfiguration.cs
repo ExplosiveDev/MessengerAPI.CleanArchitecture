@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection.Emit;
 
 namespace Messenger.DataAccess.Configuration
 {
@@ -25,7 +26,6 @@ namespace Messenger.DataAccess.Configuration
 				.HasMany(c => c.UserChats)
 				.WithOne(uc => uc.Chat)
 				.HasForeignKey(uc => uc.ChatId);
-
 
         }
     }
