@@ -4,6 +4,7 @@ using Messenger.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messenger.DataAccess.Migrations
 {
     [DbContext(typeof(MessengerDBcontext))]
-    partial class MessengerDBcontextModelSnapshot : ModelSnapshot
+    [Migration("20250324192651_rename_field_in_MediaMessageEntity")]
+    partial class rename_field_in_MediaMessageEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,10 +85,6 @@ namespace Messenger.DataAccess.Migrations
 
                     b.Property<Guid?>("MediaMessageId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("URL")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -265,28 +264,28 @@ namespace Messenger.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("37cba081-6706-48f7-bb18-502550981e3f"),
+                            Id = new Guid("e0b753a8-8026-46aa-ae0b-d31fb1563afa"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380963333333",
                             UserName = "Alice Johnson"
                         },
                         new
                         {
-                            Id = new Guid("962b0689-6e17-41b3-a8fc-af02eedaf284"),
+                            Id = new Guid("a7b63019-bd79-48ba-bcc6-5b0b7f598f1a"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380964444444",
                             UserName = "Bob Brown"
                         },
                         new
                         {
-                            Id = new Guid("b63954e7-77eb-4139-b704-f0aff43038b6"),
+                            Id = new Guid("d52592be-5038-4f2d-aaee-a625f4763fe3"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380965555555",
                             UserName = "Charlie Davis"
                         },
                         new
                         {
-                            Id = new Guid("769fa878-2666-452b-8af6-a468284a88c8"),
+                            Id = new Guid("61e321dc-8c7b-4879-b8d1-13ff0b63fb71"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380966666666",
                             UserName = "David Evans"

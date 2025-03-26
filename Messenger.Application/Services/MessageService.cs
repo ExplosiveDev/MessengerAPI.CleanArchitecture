@@ -22,20 +22,22 @@ namespace Messenger.Application.Services
 			_fileRepository = fileRepository;
 		}
 
-		public async Task<Message> AddMessage(string content, string photoId, Guid chatId, Guid senderId)
+		public async Task<TextMessage> AddTextMessage(string content, Guid chatId, Guid senderId)
 		{
-			var message = await _messageRepository.Add(content, chatId, senderId);
-			if (photoId != string.Empty) message = await _fileRepository.AddPhotosToMessage(message.Id, Guid.Parse(photoId));
+			var textMessage = await _messageRepository.AddTextMessage(content, chatId, senderId);
 
-			return message;
+			return textMessage;
 
         }
-		public async Task<List<Message>> GetAllMessages()
+
+		public async Task<MediaMessage> AddMediaMessage(string caption, Guid fileId, Guid senderId, Guid chatId)
 		{
-			return await _messageRepository.Get();
+			var mediaMessage = await _messageRepository.AddMediaMessage(caption, fileId, senderId, chatId);
+
+			return mediaMessage;
 		}
 
-        public async Task<List<Message>> GetMessagesByChatId(Guid chatId)
+        public async Task<SearchedMessages> GetMessagesByChatId(Guid chatId)
         {
 			if(_chatRepository.Get(chatId) is not null)
 				return await _messageRepository.GetMessagesByChatId(chatId);

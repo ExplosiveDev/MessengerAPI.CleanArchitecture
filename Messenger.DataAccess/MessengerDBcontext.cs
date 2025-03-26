@@ -12,13 +12,20 @@ namespace Messenger.DataAccess
 		DbContextOptions<MessengerDBcontext> options,
 		IOptions<AuthorizationOption> authOptions) : DbContext(options)
 	{
+
+        //Chats
         public DbSet<ChatEntity> Chats { get; set; }
         public DbSet<PrivateChatEntity> PrivateChats { get; set; }
 		public DbSet<GroupChatEntity> GroupChat { get; set; }
-		public DbSet<UserEntity> Users { get; set; }
+
+        //Messages
+        public DbSet<MessageEntity> Messages { get; set; }
+        public DbSet<TextMessageEntity> TextMessages { get; set; }
+        public DbSet<MediaMessageEntity> MediaMessages { get; set; }
+
+        public DbSet<UserEntity> Users { get; set; }
 		public DbSet<RoleEntity> Roles { get; set; }
 		public DbSet<UserRoleEntity> UserRoles { get; set; }
-		public DbSet<MessageEntity> Messages { get; set; }
 		public DbSet<FileEntity> Files { get; set; }
 		public DbSet<ConnectionEntity> Connections { get; set; }
 		public DbSet<UserChatEntity> UserChats { get; set; }

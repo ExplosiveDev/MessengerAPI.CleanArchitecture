@@ -4,6 +4,7 @@ using Messenger.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messenger.DataAccess.Migrations
 {
     [DbContext(typeof(MessengerDBcontext))]
-    partial class MessengerDBcontextModelSnapshot : ModelSnapshot
+    [Migration("20250324184427_some_fixes_with_fileEntity")]
+    partial class some_fixes_with_fileEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,10 +85,6 @@ namespace Messenger.DataAccess.Migrations
 
                     b.Property<Guid?>("MediaMessageId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("URL")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -265,28 +264,28 @@ namespace Messenger.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("37cba081-6706-48f7-bb18-502550981e3f"),
+                            Id = new Guid("8eedf3c2-19e5-40b1-a181-50743046a76c"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380963333333",
                             UserName = "Alice Johnson"
                         },
                         new
                         {
-                            Id = new Guid("962b0689-6e17-41b3-a8fc-af02eedaf284"),
+                            Id = new Guid("d79c22c7-205a-40a3-914f-7ed03bff7979"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380964444444",
                             UserName = "Bob Brown"
                         },
                         new
                         {
-                            Id = new Guid("b63954e7-77eb-4139-b704-f0aff43038b6"),
+                            Id = new Guid("a9af2060-0d44-4cc1-a2a4-e6912acd3fa0"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380965555555",
                             UserName = "Charlie Davis"
                         },
                         new
                         {
-                            Id = new Guid("769fa878-2666-452b-8af6-a468284a88c8"),
+                            Id = new Guid("1ea9dd96-b95a-4e3d-9257-c4a42fff280b"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380966666666",
                             UserName = "David Evans"
@@ -390,11 +389,11 @@ namespace Messenger.DataAccess.Migrations
                 {
                     b.HasBaseType("Messenger.DataAccess.Entities.MessageEntity");
 
-                    b.Property<string>("Caption")
+                    b.Property<string>("MediaType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MediaType")
+                    b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

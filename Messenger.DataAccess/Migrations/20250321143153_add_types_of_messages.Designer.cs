@@ -4,6 +4,7 @@ using Messenger.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messenger.DataAccess.Migrations
 {
     [DbContext(typeof(MessengerDBcontext))]
-    partial class MessengerDBcontextModelSnapshot : ModelSnapshot
+    [Migration("20250321143153_add_types_of_messages")]
+    partial class add_types_of_messages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,12 +83,8 @@ namespace Messenger.DataAccess.Migrations
                     b.Property<long>("FileSize")
                         .HasColumnType("bigint");
 
-                    b.Property<Guid?>("MediaMessageId")
+                    b.Property<Guid>("MediaMessageId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("URL")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -265,28 +264,28 @@ namespace Messenger.DataAccess.Migrations
                         },
                         new
                         {
-                            Id = new Guid("37cba081-6706-48f7-bb18-502550981e3f"),
+                            Id = new Guid("5b107b1b-4049-4c5d-91f7-06d7b7e037cf"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380963333333",
                             UserName = "Alice Johnson"
                         },
                         new
                         {
-                            Id = new Guid("962b0689-6e17-41b3-a8fc-af02eedaf284"),
+                            Id = new Guid("2e0b7b95-41e7-482a-bf96-6ae4d6ef7004"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380964444444",
                             UserName = "Bob Brown"
                         },
                         new
                         {
-                            Id = new Guid("b63954e7-77eb-4139-b704-f0aff43038b6"),
+                            Id = new Guid("48262e45-a4d3-4fe6-a75f-96891011b904"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380965555555",
                             UserName = "Charlie Davis"
                         },
                         new
                         {
-                            Id = new Guid("769fa878-2666-452b-8af6-a468284a88c8"),
+                            Id = new Guid("22d2b2ca-a5f6-476d-bdf7-e947219aacc5"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380966666666",
                             UserName = "David Evans"
@@ -390,11 +389,11 @@ namespace Messenger.DataAccess.Migrations
                 {
                     b.HasBaseType("Messenger.DataAccess.Entities.MessageEntity");
 
-                    b.Property<string>("Caption")
+                    b.Property<string>("MediaType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MediaType")
+                    b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -416,7 +415,9 @@ namespace Messenger.DataAccess.Migrations
                 {
                     b.HasOne("Messenger.DataAccess.Entities.MediaMessageEntity", "MediaMessage")
                         .WithMany("Content")
-                        .HasForeignKey("MediaMessageId");
+                        .HasForeignKey("MediaMessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("MediaMessage");
                 });

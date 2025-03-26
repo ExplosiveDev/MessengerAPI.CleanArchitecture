@@ -19,16 +19,6 @@ namespace Messenger.API.Controllers
 			_messageService = messageService;
 		}
 
-		[Authorize]
-		[HttpGet("GetMessages")]
-		public async Task<ActionResult<List<MessageResponse>>> GetAllMessages()
-		{
-			var messages = await _messageService.GetAllMessages();
-
-			var response = messages.Select(p => new MessageResponse(p.Id,p.SenderId,p.Content,p.Timestamp,p.Sender));
-			return Ok(response);
-		}
-
 
         [Authorize]
         [HttpGet("GetMessagesByChat")]

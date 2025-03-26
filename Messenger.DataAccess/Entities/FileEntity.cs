@@ -11,11 +11,12 @@ namespace Messenger.DataAccess.Entities
         public Guid Id { get; set; }
         public string FileName { get; set; } = string.Empty;
         public string FilePath { get; set; } = string.Empty; // Шлях до файлу на сервері
+        public string URL { get; set; } = string.Empty; // Шлях до файлу на сервері
         public long FileSize { get; set; } 
         public string ContentType { get; set; } = string.Empty; // MIME-тип
 
-        public Guid MessageId { get; set; }
-        public MessageEntity Message { get; set; }
+        public Guid? MediaMessageId { get; set; }
+        public MediaMessageEntity? MediaMessage { get; set; }
     }
 
 }

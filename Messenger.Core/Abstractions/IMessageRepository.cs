@@ -4,9 +4,10 @@ namespace Messenger.DataAccess.Repositories
 {
 	public interface IMessageRepository
 	{
-		Task<Message> Add(string content, Guid chatId, Guid senderId);
+        Task<MediaMessage> AddMediaMessage(string caption, Guid fileId, Guid senderId, Guid chatId);
+        Task<TextMessage> AddTextMessage(string content, Guid chatId, Guid senderId);
 		Task<List<Message>> Get();
-		Task<List<Message>> GetMessagesByChatId(Guid chatId);
+		Task<SearchedMessages> GetMessagesByChatId(Guid chatId);
 		Task SetIsReaded(List<Guid> ids);
     }
 }

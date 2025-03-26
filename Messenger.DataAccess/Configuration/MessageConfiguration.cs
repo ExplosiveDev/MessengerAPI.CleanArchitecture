@@ -13,9 +13,6 @@ namespace Messenger.DataAccess.Configuration
 			builder
 				.HasKey(m => m.Id);
 
-			builder
-				.Property(m => m.Content)
-				.IsRequired();
 
 			builder
 				.HasOne(m => m.Sender)
@@ -28,10 +25,6 @@ namespace Messenger.DataAccess.Configuration
 				.WithMany(c => c.Messages)
 				.HasForeignKey(m => m.ChatId);
 
-            builder
-                .HasMany(m => m.Files)
-                .WithOne(f => f.Message)
-                .HasForeignKey(f => f.MessageId);
 
 
 

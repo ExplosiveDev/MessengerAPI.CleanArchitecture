@@ -1,12 +1,6 @@
 ﻿using AutoMapper;
 using Messenger.Core.Models;
 using Messenger.DataAccess.Entities;
-using Messenger.DataAccess.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Messenger.DataAccess.Mapping
 {
@@ -26,11 +20,15 @@ namespace Messenger.DataAccess.Mapping
 			CreateMap<MessageEntity, Message>()
 				.ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => src.Timestamp.ToString("yyyy:MM:dd:HH:mm:ss")))
 				.ReverseMap();
+
             CreateMap<ChatEntity, Chat>().ReverseMap();
 			CreateMap<ConnectionEntity, Connection>().ReverseMap();
 			CreateMap<PrivateChatEntity, PrivateChat>().ReverseMap();
 			CreateMap<GroupChatEntity, GroupChat>().ReverseMap();
 			CreateMap<UserChatEntity, UserChat>().ReverseMap();
+			CreateMap<TextMessageEntity, TextMessage>().ReverseMap();
+			CreateMap<MediaMessageEntity, MediaMessage>().ReverseMap();
+			CreateMap<FileEntity, MyFile>().ForMember(dest => dest.FilePath, opt => opt.Ignore()).ReverseMap();
 
 		}
     }

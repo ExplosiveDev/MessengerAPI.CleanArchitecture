@@ -29,8 +29,6 @@ builder.Services.AddApiAuthentication(builder.Configuration);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(nameof(JwtOptions)));
 
 
-
-
 //User service
 builder.Services.AddScoped<IUserService, UserService>();
 

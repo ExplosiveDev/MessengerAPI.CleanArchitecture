@@ -11,7 +11,6 @@ namespace Messenger.DataAccess.Entities
 	public class MessageEntity
 	{
 		public Guid Id { get; set; }
-		public string Content { get; set; } = string.Empty;
 		public DateTime Timestamp { get; set; }
 
         public Guid SenderId { get; set; }
@@ -21,7 +20,5 @@ namespace Messenger.DataAccess.Entities
         public ChatEntity Chat { get; set; }
 
 		public bool IsReaded { get; set; }
-
-        public List<FileEntity> Files { get; set; }
     }
 }

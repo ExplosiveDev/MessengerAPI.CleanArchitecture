@@ -27,23 +27,12 @@ namespace Messenger.DataAccess.Repositories
                 FilePath = file.FilePath,
                 FileSize = file.FileSize,
                 ContentType = file.ContentType,
+                URL = file.URL,
             };
 
             var entity = await _context.Files.AddAsync(fileEntity);
             await _context.SaveChangesAsync();
             return entity.Entity.Id;
-        }
-
-        public async Task<Message> AddPhotosToMessage(Guid messageId, Guid photoId)
-        {
-            var messageEntity = await _context.Messages.FindAsync(messageId);
-            var photoEntity = await _context.Files.FindAsync(photoId);
-            messageEntity.Files.Add(photoEntity);
-            photoEntity.Message = messageEntity;
-            photoEntity.MessageId = messageId;
-            await _context.SaveChangesAsync();  
-            return _mapper.Map<Message>(messageEntity);
-
         }
     }
 }

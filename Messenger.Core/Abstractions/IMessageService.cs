@@ -4,9 +4,9 @@ namespace Messenger.Application.Services
 {
 	public interface IMessageService
 	{
-		Task<Message> AddMessage(string content, string photoId, Guid chatId, Guid senderId);
-		Task<List<Message>> GetAllMessages();
-		Task<List<Message>> GetMessagesByChatId(Guid chatId);
+        Task<MediaMessage> AddMediaMessage(string caption, Guid fileId, Guid senderId, Guid chatId);
+        Task<TextMessage> AddTextMessage(string content, Guid chatId, Guid senderId);
+		Task<SearchedMessages> GetMessagesByChatId(Guid chatId);
 		Task SetIsReaded(List<string> msgIds);
 
     }

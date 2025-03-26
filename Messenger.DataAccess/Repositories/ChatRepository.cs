@@ -22,12 +22,30 @@ namespace Messenger.DataAccess.Repositories
 
         private async Task<(Message, int)> GetLastMessage(Guid chatId, Guid userId)
         {
-            var messageEntity = _context.Messages
-                .AsNoTracking()
-                .Where(m => m.ChatId == chatId)
-                .OrderByDescending(m => m.Timestamp);
 
-            return (_mapper.Map<Message>(messageEntity.FirstOrDefault()), messageEntity.Where(m => m.SenderId != userId && !m.IsReaded).Count());
+            //*При викорисатнні await з ToListAsync вилітає Exeption
+            var messagesEnity = _context.Messages
+                .Where(m => m.ChatId == chatId)
+                .Include(m => (m as MediaMessageEntity).Content)
+                .ToList();
+
+            var lastMessage = messagesEnity
+                .OrderByDescending(m => m.Timestamp)
+                .FirstOrDefault();
+
+            var unreadCount = messagesEnity
+                .Where(m => 
+                m.SenderId != userId &&
+                           !m.IsReaded)
+                .Count();
+
+            Message resultMessage = lastMessage switch
+            {
+                TextMessageEntity textMsg => _mapper.Map<TextMessage>(textMsg),
+                MediaMessageEntity mediaMsg => _mapper.Map<MediaMessage>(mediaMsg),
+                _ => null
+            };
+            return (resultMessage, unreadCount);
         }
 
         public async Task<SearchedChats> GetSavedChats(Guid userId)

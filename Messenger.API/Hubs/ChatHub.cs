@@ -9,7 +9,8 @@ using System.Text.RegularExpressions;
 
 namespace Messenger.API.Hubs
 {
-    public record sendMessagePayload(string content, string photoId, string senderId, string chatId);
+    public record sendTextMessagePayload(string content, string senderId, string chatId);
+    public record sendMediaMessagePayload(string caption, string fileId, string senderId, string chatId);
     public record messagesReadedPayload(string chatId, string userId, List<string> messegeIds);
     public interface IChatClient
     {
@@ -42,7 +43,7 @@ namespace Messenger.API.Hubs
 
         }
 
-        public async Task SendMessage(sendMessagePayload data)
+        public async Task SendTextMessage(sendTextMessagePayload data)
         {
             List<Connection> connections = await _connectionService.GetConnections(Guid.Parse(data.chatId));
             var sender = await _userService.GetById(Guid.Parse(data.senderId));
@@ -50,10 +51,25 @@ namespace Messenger.API.Hubs
             if (connections is not null)
             {
 
-                var message = await _messageService.AddMessage(data.content, data.photoId, Guid.Parse(data.chatId), Guid.Parse(data.senderId));
+                var textMessage = await _messageService.AddTextMessage(data.content, Guid.Parse(data.chatId), Guid.Parse(data.senderId));
                 foreach (var connection in connections)
                 {
-                    await Clients.Client(connection.ConnectionId).ReceiveMessage(message, 200);
+                    await Clients.Client(connection.ConnectionId).ReceiveMessage(textMessage, 200);
+                }
+            }
+        }
+
+        public async Task SendMediaMessage(sendMediaMessagePayload data)
+        {
+            List<Connection> connections = await _connectionService.GetConnections(Guid.Parse(data.chatId));
+            var sender = await _userService.GetById(Guid.Parse(data.senderId));
+            if (connections is not null)
+            {
+
+                var mediaMessage = await _messageService.AddMediaMessage(data.caption, Guid.Parse(data.fileId), Guid.Parse(data.senderId), Guid.Parse(data.chatId));
+                foreach (var connection in connections)
+                {
+                    await Clients.Client(connection.ConnectionId).ReceiveMessage(mediaMessage, 200);
                 }
             }
         }

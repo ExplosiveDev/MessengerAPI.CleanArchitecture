@@ -10,10 +10,9 @@ namespace Messenger.Core.Models
             
         }
         protected Message
-			(Guid id, string content, Guid userId, User user, Guid chatId, Chat chat, string timestamp)
+			(Guid id, Guid userId, User user, Guid chatId, Chat chat, string timestamp)
 		{
 			Id = id;
-			Content = content;
 			Timestamp = timestamp;
 			SenderId = userId;
 			Sender = user;
@@ -22,7 +21,6 @@ namespace Messenger.Core.Models
 		}
 
 		public Guid Id { get; set; }
-		public string Content { get; set; }
 		public string Timestamp { get; set; }
 
 		public Guid SenderId { get; set; }
@@ -34,9 +32,9 @@ namespace Messenger.Core.Models
 		public bool isReaded { get; set; } = false;
 
         public static Message Create
-			(Guid id, string content, Guid senderId, User sender, Guid chatId, Chat chat, string timestamp)
+			(Guid id, Guid senderId, User sender, Guid chatId, Chat chat, string timestamp)
 		{
-			var message = new Message(id, content, senderId, sender, chatId, chat, timestamp);
+			var message = new Message(id, senderId, sender, chatId, chat, timestamp);
 			return message;
 		}
 	}
