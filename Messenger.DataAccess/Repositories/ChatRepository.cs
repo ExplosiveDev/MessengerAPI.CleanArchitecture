@@ -60,14 +60,18 @@ namespace Messenger.DataAccess.Repositories
                 .OfType<PrivateChatEntity>()
                 .Where(c => chatIds.Contains(c.Id))
                 .Include(c => c.User1)
+                .ThenInclude(c => c.ActiveAvatar)
                 .Include(c => c.User2)
+                .ThenInclude(c => c.ActiveAvatar)
+                .AsNoTracking()
                 .ToListAsync();
 
             var groupChatsEntity = await _context.Chats
                 .OfType<GroupChatEntity>()
                 .Where(c => chatIds.Contains(c.Id))
                 .Include(gc => gc.UserChats)
-                .ThenInclude(uc => uc.User) 
+                .ThenInclude(uc => uc.User)
+                .AsNoTracking()
                 .ToListAsync();
 
             SearchedChats savedChats = new SearchedChats()
@@ -81,9 +85,8 @@ namespace Messenger.DataAccess.Repositories
                 savedChats.PrivateChats.ForEach(async (PrivateChat chat) => {
                     var cortage = await GetLastMessage(chat.Id, userId);
                     chat.TopMessage = cortage.Item1;
-                    chat.UnReaded = cortage.Item2;
-                    
-                    });
+                    chat.UnReaded = cortage.Item2;                   
+                });
 
             }
 
@@ -93,7 +96,6 @@ namespace Messenger.DataAccess.Repositories
                     var cortage = await GetLastMessage(chat.Id, userId);
                     chat.TopMessage = cortage.Item1;
                     chat.UnReaded = cortage.Item2;
-
                 });
             }
 
@@ -109,6 +111,7 @@ namespace Messenger.DataAccess.Repositories
                 .FirstOrDefaultAsync(x => x.Id == currentUserId);
 
             var usersEntity = await _context.Users
+                .Include(c => c.ActiveAvatar)
                 .AsNoTracking()
                 .Where(u => u.UserName.Contains(name) && u.Id != currentUserId)
                 .ToListAsync();
@@ -147,13 +150,26 @@ namespace Messenger.DataAccess.Repositories
             return searchedGlobalChats;
         }
 
-        public async Task<Chat> Get(Guid chatId)
+        public async Task<Chat> Get(Guid chatId, Guid userId)
         {
             var chatEntity = await _context.Chats
+                .Include(c => (c as PrivateChatEntity).User1)
+                .Include(c => (c as PrivateChatEntity).User2)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == chatId);
-            
-            return _mapper.Map<Chat>(chatEntity);
+
+            Chat resultChat = chatEntity switch
+            {
+                PrivateChatEntity textMsg => _mapper.Map<PrivateChat>(chatEntity),
+                GroupChatEntity mediaMsg => _mapper.Map<GroupChat>(chatEntity),
+                _ => null
+            };
+
+            var cortage = await GetLastMessage(chatId, userId);
+            resultChat.TopMessage = cortage.Item1;
+            resultChat.UnReaded = cortage.Item2;
+
+            return resultChat;
 
         }
 
@@ -182,6 +198,15 @@ namespace Messenger.DataAccess.Repositories
             await _context.SaveChangesAsync();
 
             return _mapper.Map<PrivateChat>(privateChatEntity);
+        }
+
+        public async Task<Chat> Get(Guid chatId)
+        {
+            var chatEntity = await _context.Chats
+                 .AsNoTracking()
+                 .FirstOrDefaultAsync(x => x.Id == chatId);
+
+            return _mapper.Map<Chat>(chatEntity);
         }
     }
 }

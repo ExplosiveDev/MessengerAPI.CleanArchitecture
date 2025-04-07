@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Messenger.Core.Models;
 using Messenger.DataAccess.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Messenger.DataAccess.Repositories
 {
@@ -18,7 +19,6 @@ namespace Messenger.DataAccess.Repositories
             _context = context;
             _mapper = mapper;
         }
-
         public async Task<Guid> UploadFile(MyFile file)
         {
             FileEntity fileEntity = new FileEntity()
@@ -33,6 +33,61 @@ namespace Messenger.DataAccess.Repositories
             var entity = await _context.Files.AddAsync(fileEntity);
             await _context.SaveChangesAsync();
             return entity.Entity.Id;
+        }
+        private async Task SetActiveAvatar(Guid userId, Guid avatarId)
+        {
+            var user = await _context.Users.Include(u => u.Avatars).FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user != null)
+            {
+                var activeAvatar = user.Avatars.FirstOrDefault(a => a.Id == avatarId);
+                if (activeAvatar != null)
+                {
+                    user.ActiveAvatarId = activeAvatar.Id;
+                    user.ActiveAvatar = activeAvatar;
+                    await _context.SaveChangesAsync();
+                }
+            }
+        }
+
+
+
+        public async Task<MyFile> UploadAvatar(MyFile file)
+        {
+            var userEntity = await _context.Users
+                .Include(u => u.Avatars)
+                .FirstOrDefaultAsync(u => u.Id == file.User.Id);
+
+            if (userEntity != null)
+            {
+                FileEntity fileEntity = new FileEntity()
+                {
+                    FileName = file.FileName,
+                    FilePath = file.FilePath,
+                    FileSize = file.FileSize,
+                    ContentType = file.ContentType,
+                    URL = file.URL,
+                    User = userEntity,
+                    UserId = userEntity.Id
+                };
+
+                userEntity.Avatars.Add(fileEntity);
+
+                var entity = _context.Files.Add(fileEntity).Entity;
+
+                await _context.SaveChangesAsync();
+
+                await SetActiveAvatar(userEntity.Id, entity.Id);
+
+                return _mapper.Map<MyFile>(fileEntity);
+            }
+            else
+            {
+                // Обробка ситуації, якщо користувача не знайдено
+                throw new Exception("Користувача не знайдено");
+            }
+
+
         }
     }
 }

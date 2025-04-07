@@ -23,14 +23,16 @@ namespace Messenger.API.Hubs
         private readonly IConnectionService _connectionService;
         private readonly IUserService _userService;
         private readonly IMessageService _messageService;
+        private readonly IChatService _chatService;
         private readonly IFileService _fileService;
 
-       public ChatHub(IConnectionService connectionService, IUserService userService, IMessageService messageService, IFileService fileService)
+       public ChatHub(IConnectionService connectionService, IUserService userService, IMessageService messageService, IFileService fileService, IChatService chatService)
         {
             _connectionService = connectionService;
             _userService = userService;
             _messageService = messageService;
             _fileService = fileService;
+            _chatService = chatService;
         }
 
         public async Task JoinChat(UserConnection connection)
@@ -50,7 +52,6 @@ namespace Messenger.API.Hubs
 
             if (connections is not null)
             {
-
                 var textMessage = await _messageService.AddTextMessage(data.content, Guid.Parse(data.chatId), Guid.Parse(data.senderId));
                 foreach (var connection in connections)
                 {

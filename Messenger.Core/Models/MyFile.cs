@@ -17,5 +17,6 @@ namespace Messenger.Core.Models
 
         public Guid MessageId { get; set; }
         public Message Message { get; set; }
+        public User User { get; set; }
     }
 }

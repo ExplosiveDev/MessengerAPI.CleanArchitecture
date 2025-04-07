@@ -21,5 +21,10 @@ namespace Messenger.Application.Services
         {
             return await _fileRepository.UploadFile(file);
         }
+
+        public async Task<MyFile> UploadAvatar(MyFile file)
+        {
+            return await _fileRepository.UploadAvatar(file);
+        }
     }
 }

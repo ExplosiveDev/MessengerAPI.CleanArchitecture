@@ -4,6 +4,7 @@ using Messenger.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Messenger.DataAccess.Migrations
 {
     [DbContext(typeof(MessengerDBcontext))]
-    partial class MessengerDBcontextModelSnapshot : ModelSnapshot
+    [Migration("20250403153821_add_avatar_to_User")]
+    partial class add_avatar_to_User
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,27 +90,11 @@ namespace Messenger.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("MediaMessageId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Files");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("beaac0ce-6668-4be8-a3a2-80f47544200d"),
-                            ContentType = "image/png",
-                            FileName = "user.png",
-                            FilePath = "wwwroot\\uploads\\user.png",
-                            FileSize = 19456L,
-                            URL = "http://192.168.0.100:5187/uploads/user.png"
-                        });
                 });
 
             modelBuilder.Entity("Messenger.DataAccess.Entities.MessageEntity", b =>
@@ -233,7 +220,7 @@ namespace Messenger.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ActiveAvatarId")
+                    b.Property<Guid?>("AvatarId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PasswordHash")
@@ -251,7 +238,7 @@ namespace Messenger.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActiveAvatarId");
+                    b.HasIndex("AvatarId");
 
                     b.ToTable("Users");
 
@@ -259,7 +246,6 @@ namespace Messenger.DataAccess.Migrations
                         new
                         {
                             Id = new Guid("6c0136a2-48d9-450f-9814-5cba270dce14"),
-                            ActiveAvatarId = new Guid("beaac0ce-6668-4be8-a3a2-80f47544200d"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380964674274",
                             UserName = "Vlad Gromovij"
@@ -267,7 +253,6 @@ namespace Messenger.DataAccess.Migrations
                         new
                         {
                             Id = new Guid("f9a74d03-b637-4787-bdf2-930eff19c944"),
-                            ActiveAvatarId = new Guid("beaac0ce-6668-4be8-a3a2-80f47544200d"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380963554053",
                             UserName = "Saller"
@@ -275,7 +260,6 @@ namespace Messenger.DataAccess.Migrations
                         new
                         {
                             Id = new Guid("46028997-952e-4f9c-9282-4ebd7526ea9c"),
-                            ActiveAvatarId = new Guid("beaac0ce-6668-4be8-a3a2-80f47544200d"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380961111111",
                             UserName = "John Doe"
@@ -283,39 +267,34 @@ namespace Messenger.DataAccess.Migrations
                         new
                         {
                             Id = new Guid("57322de4-860d-4c50-950a-0e88f87d096c"),
-                            ActiveAvatarId = new Guid("beaac0ce-6668-4be8-a3a2-80f47544200d"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380962222222",
                             UserName = "Jane Smith"
                         },
                         new
                         {
-                            Id = new Guid("e814d398-0c5d-44d0-88d8-bd52ffb82bf4"),
-                            ActiveAvatarId = new Guid("beaac0ce-6668-4be8-a3a2-80f47544200d"),
+                            Id = new Guid("16d90671-e8b9-4239-b41c-26ec6d8bd48d"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380963333333",
                             UserName = "Alice Johnson"
                         },
                         new
                         {
-                            Id = new Guid("07499e59-9604-41d9-8a88-c95e079424ea"),
-                            ActiveAvatarId = new Guid("beaac0ce-6668-4be8-a3a2-80f47544200d"),
+                            Id = new Guid("708b5d9e-9c0f-47a8-a3d5-a77f1af6c50c"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380964444444",
                             UserName = "Bob Brown"
                         },
                         new
                         {
-                            Id = new Guid("9928f923-b6bb-422e-bad9-43c7f0d5f3ba"),
-                            ActiveAvatarId = new Guid("beaac0ce-6668-4be8-a3a2-80f47544200d"),
+                            Id = new Guid("1232faa3-13b2-4eb9-9f7d-3565f106dba6"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380965555555",
                             UserName = "Charlie Davis"
                         },
                         new
                         {
-                            Id = new Guid("013bba47-53cc-43a1-a39b-08447f8e278d"),
-                            ActiveAvatarId = new Guid("beaac0ce-6668-4be8-a3a2-80f47544200d"),
+                            Id = new Guid("d9c622ab-1a0b-4846-892a-8e6a64b3be8b"),
                             PasswordHash = "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a",
                             Phone = "+380966666666",
                             UserName = "David Evans"
@@ -447,13 +426,7 @@ namespace Messenger.DataAccess.Migrations
                         .WithMany("Content")
                         .HasForeignKey("MediaMessageId");
 
-                    b.HasOne("Messenger.DataAccess.Entities.UserEntity", "User")
-                        .WithMany("Avatars")
-                        .HasForeignKey("UserId");
-
                     b.Navigation("MediaMessage");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Messenger.DataAccess.Entities.MessageEntity", b =>
@@ -496,11 +469,11 @@ namespace Messenger.DataAccess.Migrations
 
             modelBuilder.Entity("Messenger.DataAccess.Entities.UserEntity", b =>
                 {
-                    b.HasOne("Messenger.DataAccess.Entities.FileEntity", "ActiveAvatar")
-                        .WithMany()
-                        .HasForeignKey("ActiveAvatarId");
+                    b.HasOne("Messenger.DataAccess.Entities.FileEntity", "Avatar")
+                        .WithMany("Users")
+                        .HasForeignKey("AvatarId");
 
-                    b.Navigation("ActiveAvatar");
+                    b.Navigation("Avatar");
                 });
 
             modelBuilder.Entity("RoleEntityUserEntity", b =>
@@ -555,10 +528,13 @@ namespace Messenger.DataAccess.Migrations
                     b.Navigation("UserChats");
                 });
 
+            modelBuilder.Entity("Messenger.DataAccess.Entities.FileEntity", b =>
+                {
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("Messenger.DataAccess.Entities.UserEntity", b =>
                 {
-                    b.Navigation("Avatars");
-
                     b.Navigation("UserChats");
                 });
 

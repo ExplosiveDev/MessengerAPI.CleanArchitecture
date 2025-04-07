@@ -48,7 +48,9 @@ namespace Messenger.Application.Services
 
 			var token = _jwtProvider.GenerateToken(user);
 
-			return (User.Create(user.Id,user.UserName,user.Phone,"password", user.Roles, user.Messages, user.Chats).User, token);
+            user.PasswordHash = "Pass";
+
+            return (user, token);
 		}
 		public async Task<bool> IsUniquePhone(string phone)
 		{

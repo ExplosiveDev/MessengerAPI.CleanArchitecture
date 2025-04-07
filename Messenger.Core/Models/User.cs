@@ -37,7 +37,10 @@ namespace Messenger.Core.Models
 		[JsonIgnore]
 		public ICollection<Chat> Chats { get;  set; } = [];
 
-		public static (User User, string Error) Create(Guid id, string userName, string phone, string hashedPassword, ICollection<string> roles, ICollection<Message> products, ICollection<Chat> chats)
+        public MyFile? ActiveAvatar { get; set; }
+        public Guid? ActiveAvatarId { get; set; }
+
+        public static (User User, string Error) Create(Guid id, string userName, string phone, string hashedPassword, ICollection<string> roles, ICollection<Message> products, ICollection<Chat> chats)
 		{
 			var error = string.Empty;
 

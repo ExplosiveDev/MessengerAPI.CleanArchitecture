@@ -8,5 +8,6 @@ namespace Messenger.Application.Services
 
         Task<SearchedChats> GetSavedChats(Guid userId);
         Task<PrivateChat> CreatePrivateChat(Guid user1Id, Guid user2Id);
+        Task<Chat> GetChat(Guid chatId, Guid userId);
     }
 }

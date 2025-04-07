@@ -13,6 +13,9 @@ namespace Messenger.DataAccess.Entities
 		public string UserName { get;  set; } = string.Empty;
 		public string PasswordHash { get; set; } = string.Empty;
 		public string Phone { get; set; } = string.Empty;
+		public List<FileEntity>? Avatars { get; set; }
+        public Guid? ActiveAvatarId { get; set; } 
+        public FileEntity? ActiveAvatar { get; set; } 
 
         public ICollection<UserChatEntity> UserChats { get; set; } = [];
         public ICollection<RoleEntity> Roles { get; set; } = [];

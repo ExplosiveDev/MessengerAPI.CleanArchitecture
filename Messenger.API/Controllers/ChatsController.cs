@@ -54,6 +54,21 @@ namespace Messenger.API.Controllers
             return Ok(savedChats);
         }
 
+
+        [Authorize]
+        [HttpGet("GetChat")]
+        public async Task<ActionResult<Chat>> GetChat([FromQuery] string chatId)
+        {
+            var userId = User.FindFirst("userId")?.Value;
+            if (userId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+            var chat = await _chatService.GetChat(Guid.Parse(chatId), Guid.Parse(userId));
+
+            return Ok(chat);
+        }
+
         [Authorize]
         [HttpPost("CreatePrivateChat")]
         public async Task<ActionResult<PrivateChat>> CreatePrivateChat([FromQuery] string user2Id)

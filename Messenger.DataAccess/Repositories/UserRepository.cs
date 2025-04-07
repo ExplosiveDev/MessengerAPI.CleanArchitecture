@@ -35,10 +35,21 @@ namespace Messenger.DataAccess.Repositories
 			await _context.SaveChangesAsync();
 		}
 
+		private async Task GetDefaultAvatar(UserEntity userEntity)
+		{
+            var defaultAvatar = await _context.Files.FirstOrDefaultAsync(f => f.FileName == "user.png");
+            if (defaultAvatar != null)
+            {
+                userEntity.ActiveAvatar = defaultAvatar;
+                userEntity.ActiveAvatarId = defaultAvatar.Id;
+            }
+        }
+
 		public async Task<User> GetByPhone(string phone)
 		{
 			var userEntity = await _context.Users
-				.AsNoTracking()
+                .Include(x => x.ActiveAvatar)
+                .AsNoTracking()
 				.FirstOrDefaultAsync(x => x.Phone == phone) ?? throw new Exception();
 
 			var userRoles = _context.UserRoles.Where(ur => ur.UserId == userEntity.Id).ToList();
@@ -54,15 +65,21 @@ namespace Messenger.DataAccess.Repositories
 				}
 			}
 
+			if (userEntity.ActiveAvatar == null) 
+			{
+				await GetDefaultAvatar(userEntity);
+            }
+
 
 			if (userEntity != null)
-				return User.Create(userEntity.Id, userEntity.UserName, userEntity.Phone, userEntity.PasswordHash, roles, [], []).User;
+				return _mapper.Map<User>(userEntity);
 
 			return null;
 		}
 		public async Task<User> GetById(Guid userId)
 		{
 			var userEntity = await _context.Users
+				.Include(x => x.ActiveAvatar)
 				.AsNoTracking()
 				.FirstOrDefaultAsync(x => x.Id == userId) ?? throw new Exception();
 
@@ -71,10 +88,16 @@ namespace Messenger.DataAccess.Repositories
 			foreach (var role in userEntity.Roles)
 				roles.Add(role.Name);
 
-			if (userEntity != null)
-				return User.Create(userEntity.Id, userEntity.UserName, userEntity.Phone, userEntity.PasswordHash, roles, []/*_mapper.Map<ICollection<Product>>(userEntity.Products)*/, []).User;
 
-			return null;
+            if (userEntity.ActiveAvatar == null)
+            {
+                await GetDefaultAvatar(userEntity);
+            }
+
+            if (userEntity != null)
+				return _mapper.Map<User>(userEntity);
+
+            return null;
 		}
 		public async Task<bool> IsUniquePhone(string phone)
 		{
@@ -87,12 +110,27 @@ namespace Messenger.DataAccess.Repositories
 
 		public async Task<List<User>> SearchByUserName(string userName)
 		{
-			var userEntity = _context.Users
-					.AsNoTracking()
+			var usersEntity = _context.Users
+					.Include(x => x.ActiveAvatar)
+                    .AsNoTracking()
 					.Where(x => x.UserName.Contains(userName))
 					.ToList();
 
-			var mapped = _mapper.Map<List<User>>(userEntity);
+			if(usersEntity.Count > 0)
+			{
+                var defaultAvatar = await _context.Files.FirstOrDefaultAsync(f => f.FileName == "user.png");
+                foreach (var userEntity in usersEntity)
+                {
+                    if (defaultAvatar != null && userEntity.ActiveAvatar == null)
+                    {
+                        userEntity.ActiveAvatar = defaultAvatar;
+                        userEntity.ActiveAvatarId = defaultAvatar.Id;
+                    }
+                }
+            }
+
+
+            var mapped = _mapper.Map<List<User>>(usersEntity);
 			return mapped;
 		}
 	}

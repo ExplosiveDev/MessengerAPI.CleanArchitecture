@@ -5,5 +5,6 @@ namespace Messenger.Application.Services
     public interface IFileService
     {
         Task<Guid> Upload(MyFile file);
+        Task<MyFile> UploadAvatar(MyFile file);
     }
 }

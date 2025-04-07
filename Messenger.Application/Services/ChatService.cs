@@ -39,5 +39,10 @@ namespace Messenger.Application.Services
             if (user1 == null || user2 == null) return null;
             return await _chatRepository.CreatePrivateChat(user1Id, user2Id);
         }
+
+        public async Task<Chat> GetChat(Guid chatId, Guid userId)
+        {
+            return await _chatRepository.Get(chatId, userId);   
+        }
     }
 }
