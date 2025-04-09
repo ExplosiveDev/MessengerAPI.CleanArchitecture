@@ -12,5 +12,7 @@ namespace Messenger.DataAccess.Entities
         public string GroupName { get; set; }
         public Guid AdminId { get; set; }
         public User Admin { get; set; }
+        public Guid? ActiveIconId { get; set; }
+        public MyFile? ActiveIcon { get; set; }
     }
 }

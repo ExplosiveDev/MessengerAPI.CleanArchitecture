@@ -24,7 +24,7 @@ namespace Messenger.DataAccess.Repositories
                 throw new ArgumentException("Користувач не знайдений", nameof(senderId));
 
             // 2. Перевірка чату
-            var chatExists = await _context.PrivateChats.AnyAsync(c => c.Id == chatId);
+            var chatExists = await _context.Chats.AnyAsync(c => c.Id == chatId);
             if (!chatExists)
                 throw new ArgumentException("Чат не знайдено", nameof(chatId));
 

@@ -1,4 +1,5 @@
 ﻿using Messenger.Core.Models;
+using Messenger.DataAccess.Entities;
 
 namespace Messenger.Application.Services
 {
@@ -8,6 +9,7 @@ namespace Messenger.Application.Services
 
         Task<SearchedChats> GetSavedChats(Guid userId);
         Task<PrivateChat> CreatePrivateChat(Guid user1Id, Guid user2Id);
+        Task<GroupChat> CreateGroupChat(string ownerId, List<string> userIds, string groupName);
         Task<Chat> GetChat(Guid chatId, Guid userId);
     }
 }

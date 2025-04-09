@@ -2,6 +2,7 @@
 using Messenger.API.Contracts;
 using Messenger.Application.Services;
 using Messenger.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -34,18 +35,18 @@ namespace Messenger.API.Controllers
 			if (string.IsNullOrEmpty(cortage.error))
 				return Ok();
 			else
-				return BadRequest(cortage.error); 
+				return BadRequest(cortage.error);
 		}
 
 		[HttpPost("login")]
 		public async Task<ActionResult> Login([FromBody] LoginUserRequest request)
 		{
 			var cortage = await _userService.Login(request.Phone, request.Password);
-			
-			if(string.IsNullOrEmpty(cortage.token)) 
-				return BadRequest(new {message = "User name or password is incorrect "});
 
-			LoginUserResponse respons = new LoginUserResponse(cortage.user,cortage.token);
+			if (string.IsNullOrEmpty(cortage.token))
+				return BadRequest(new { message = "User name or password is incorrect " });
+
+			LoginUserResponse respons = new LoginUserResponse(cortage.user, cortage.token);
 			return Ok(respons);
 		}
 
@@ -62,5 +63,25 @@ namespace Messenger.API.Controllers
 		}
 
 
-	}
+		[Authorize]
+		[HttpGet("GetContacts")]
+        public async Task<ActionResult<List<User>>> GetContacts()
+		{
+            var userId = User.FindFirst("userId")?.Value;
+
+            if (userId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+			var contacts = await _userService.GetContacts(Guid.Parse(userId));
+
+			if (contacts == null) return BadRequest(new { message = "Smth went wrong..." });
+
+            return Ok(contacts);
+        }
+
+
+
+    }
 }

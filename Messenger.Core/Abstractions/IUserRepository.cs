@@ -15,5 +15,6 @@ namespace Messenger.Core.Abstractions
 		Task<User> GetById(Guid userId);
 		public Task<bool> IsUniquePhone(string email);
 		Task<List<User>> SearchByUserName(string userName);
-	}
+        Task<List<User>> GetContacts(Guid userId);
+    }
 }

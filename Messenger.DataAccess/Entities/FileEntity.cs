@@ -17,8 +17,12 @@ namespace Messenger.DataAccess.Entities
 
         public Guid? MediaMessageId { get; set; }
         public MediaMessageEntity? MediaMessage { get; set; }
+
         public Guid? UserId { get; set; }
         public UserEntity? User { get; set; }
+
+        public Guid? GroupChatId { get; set; }
+        public GroupChatEntity? GroupChat { get; set; }
     }
 
 }

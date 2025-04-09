@@ -65,5 +65,12 @@ namespace Messenger.Application.Services
 		{
 			return await _userRepository.SearchByUserName(userName);
 		}
-	}
+
+        public async Task<List<User>> GetContacts(Guid userId)
+        {
+            if(await _userRepository.GetById(userId) == null) return null;
+
+			return await _userRepository.GetContacts(userId);
+        }
+    }
 }

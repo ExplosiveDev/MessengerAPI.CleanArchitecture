@@ -12,5 +12,8 @@ namespace Messenger.DataAccess.Entities
         public string GroupName { get; set; }
         public Guid AdminId { get; set; }
         public UserEntity Admin { get; set; }
+        public ICollection<FileEntity> GroupIcons { get; set; } = [];
+        public Guid? ActiveIconId { get; set; }
+        public FileEntity? ActiveIcon { get; set; }
     }
 }

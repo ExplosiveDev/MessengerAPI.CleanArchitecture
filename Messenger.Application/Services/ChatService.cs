@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Messenger.Core.Abstractions;
 using Messenger.Core.Models;
+using Messenger.DataAccess.Entities;
 using Messenger.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,6 +44,16 @@ namespace Messenger.Application.Services
         public async Task<Chat> GetChat(Guid chatId, Guid userId)
         {
             return await _chatRepository.Get(chatId, userId);   
+        }
+
+        public async Task<GroupChat> CreateGroupChat(string ownerId, List<string> userIds, string groupName)
+        {
+            Guid ownerGuid = Guid.Parse(ownerId);
+            List<Guid> userGuids = userIds.Select(u => Guid.Parse(u)).ToList();
+            var owner = await _userRepository.GetById(ownerGuid);
+            if(owner == null || userGuids == null) return null;
+            return await _chatRepository.CreateGroupChat(ownerGuid, userGuids, groupName);
+
         }
     }
 }

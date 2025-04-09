@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,10 +35,11 @@ namespace Messenger.DataAccess.Configuration
 				.WithOne(uc => uc.User)
 				.HasForeignKey(u => u.UserId);
 
-			builder
-				.HasMany(u => u.Avatars)
-				.WithOne(f => f.User)
-				.HasForeignKey(f => f.UserId);
+            builder
+				.HasOne(u => u.ActiveAvatar)
+				.WithMany()
+				.HasForeignKey(u => u.ActiveAvatarId)
+				.OnDelete(DeleteBehavior.SetNull);
 
 
 
@@ -51,7 +53,7 @@ namespace Messenger.DataAccess.Configuration
 					Phone = "+380964674274",
 					PasswordHash = passwordHash,
 					UserName = "Vlad Gromovij",		
-					ActiveAvatarId = Guid.Parse("beaac0ce-6668-4be8-a3a2-80f47544200d")
+					ActiveAvatarId = Guid.Parse("a7674d3f-d622-4656-9499-d46e0c7ea61a")
                 },
 				new UserEntity
 				{
@@ -59,7 +61,7 @@ namespace Messenger.DataAccess.Configuration
 					Phone = "+380963554053",
 					PasswordHash = passwordHash,
 					UserName = "Saller",
-                    ActiveAvatarId = Guid.Parse("beaac0ce-6668-4be8-a3a2-80f47544200d")
+                    ActiveAvatarId = Guid.Parse("a7674d3f-d622-4656-9499-d46e0c7ea61a")
                 },
 				new UserEntity
 				{
@@ -67,7 +69,7 @@ namespace Messenger.DataAccess.Configuration
                     Phone = "+380961111111",
 					PasswordHash = passwordHash,
 					UserName = "John Doe",
-                    ActiveAvatarId = Guid.Parse("beaac0ce-6668-4be8-a3a2-80f47544200d")
+                    ActiveAvatarId = Guid.Parse("a7674d3f-d622-4656-9499-d46e0c7ea61a")
                 },
 				new UserEntity
 				{
@@ -75,7 +77,7 @@ namespace Messenger.DataAccess.Configuration
                     Phone = "+380962222222",
 					PasswordHash = passwordHash,
 					UserName = "Jane Smith",
-                    ActiveAvatarId = Guid.Parse("beaac0ce-6668-4be8-a3a2-80f47544200d")
+                    ActiveAvatarId = Guid.Parse("a7674d3f-d622-4656-9499-d46e0c7ea61a")
                 },
 				new UserEntity
 				{
@@ -83,7 +85,7 @@ namespace Messenger.DataAccess.Configuration
 					Phone = "+380963333333",
 					PasswordHash = passwordHash,
 					UserName = "Alice Johnson",
-                    ActiveAvatarId = Guid.Parse("beaac0ce-6668-4be8-a3a2-80f47544200d")
+                    ActiveAvatarId = Guid.Parse("a7674d3f-d622-4656-9499-d46e0c7ea61a")
                 },
 				new UserEntity
 				{
@@ -91,7 +93,7 @@ namespace Messenger.DataAccess.Configuration
 					Phone = "+380964444444",
 					PasswordHash = passwordHash,
 					UserName = "Bob Brown",
-                    ActiveAvatarId = Guid.Parse("beaac0ce-6668-4be8-a3a2-80f47544200d")
+                    ActiveAvatarId = Guid.Parse("a7674d3f-d622-4656-9499-d46e0c7ea61a")
                 },
 				new UserEntity
 				{
@@ -99,7 +101,7 @@ namespace Messenger.DataAccess.Configuration
 					Phone = "+380965555555",
 					PasswordHash = passwordHash,
 					UserName = "Charlie Davis",
-                    ActiveAvatarId = Guid.Parse("beaac0ce-6668-4be8-a3a2-80f47544200d")
+                    ActiveAvatarId = Guid.Parse("a7674d3f-d622-4656-9499-d46e0c7ea61a")
                 },
 				new UserEntity
 				{
@@ -107,7 +109,7 @@ namespace Messenger.DataAccess.Configuration
 					Phone = "+380966666666",
 					PasswordHash = passwordHash,
 					UserName = "David Evans",
-                    ActiveAvatarId = Guid.Parse("beaac0ce-6668-4be8-a3a2-80f47544200d")
+                    ActiveAvatarId = Guid.Parse("a7674d3f-d622-4656-9499-d46e0c7ea61a")
                 }
 			);
 		}

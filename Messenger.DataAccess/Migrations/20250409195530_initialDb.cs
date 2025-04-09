@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Messenger.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class initialDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,20 +52,6 @@ namespace Messenger.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Chats",
                 columns: table => new
                 {
@@ -73,26 +59,87 @@ namespace Messenger.DataAccess.Migrations
                     Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
                     GroupName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AdminId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ActiveIconId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     User1Id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     User2Id = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Chats", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Files",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    URL = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileSize = table.Column<long>(type: "bigint", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MediaMessageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    GroupChatId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Files", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Chats_Users_AdminId",
-                        column: x => x.AdminId,
-                        principalTable: "Users",
+                        name: "FK_Files_Chats_GroupChatId",
+                        column: x => x.GroupChatId,
+                        principalTable: "Chats",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ActiveAvatarId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Files_ActiveAvatarId",
+                        column: x => x.ActiveAvatarId,
+                        principalTable: "Files",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SenderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ChatId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsReaded = table.Column<bool>(type: "bit", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
+                    Caption = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MediaType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_Chats_ChatId",
+                        column: x => x.ChatId,
+                        principalTable: "Chats",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Chats_Users_User1Id",
-                        column: x => x.User1Id,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Chats_Users_User2Id",
-                        column: x => x.User2Id,
+                        name: "FK_Messages_Users_SenderId",
+                        column: x => x.SenderId,
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
@@ -122,33 +169,6 @@ namespace Messenger.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Messages",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SenderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ChatId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsReaded = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Messages", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Messages_Chats_ChatId",
-                        column: x => x.ChatId,
-                        principalTable: "Chats",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Messages_Users_SenderId",
-                        column: x => x.SenderId,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserChats",
                 columns: table => new
                 {
@@ -171,26 +191,13 @@ namespace Messenger.DataAccess.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Files",
-                columns: table => new
+            migrationBuilder.InsertData(
+                table: "Files",
+                columns: new[] { "Id", "ContentType", "FileName", "FilePath", "FileSize", "GroupChatId", "MediaMessageId", "URL", "UserId" },
+                values: new object[,]
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FileSize = table.Column<long>(type: "bigint", nullable: false),
-                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MessageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Files", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Files_Messages_MessageId",
-                        column: x => x.MessageId,
-                        principalTable: "Messages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    { new Guid("813c1973-8109-44e8-b583-b4a26452ea6e"), "image/png", "groups.png", "wwwroot\\uploads\\groups.png", 19000L, null, null, "http://192.168.0.100:5187/uploads/groups.png", null },
+                    { new Guid("a7674d3f-d622-4656-9499-d46e0c7ea61a"), "image/png", "user.png", "wwwroot\\uploads\\user.png", 19456L, null, null, "http://192.168.0.100:5187/uploads/user.png", null }
                 });
 
             migrationBuilder.InsertData(
@@ -214,17 +221,17 @@ namespace Messenger.DataAccess.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "PasswordHash", "Phone", "UserName" },
+                columns: new[] { "Id", "ActiveAvatarId", "PasswordHash", "Phone", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("1137631d-877f-420b-b95a-3304fc56708a"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380966666666", "David Evans" },
-                    { new Guid("31a0e8b8-8ad8-459e-ade1-bb130c3f7ddf"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380963333333", "Alice Johnson" },
-                    { new Guid("351b7ee8-0bca-4154-b20d-6ce0cc878341"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380964444444", "Bob Brown" },
-                    { new Guid("46028997-952e-4f9c-9282-4ebd7526ea9c"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380961111111", "John Doe" },
-                    { new Guid("57322de4-860d-4c50-950a-0e88f87d096c"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380962222222", "Jane Smith" },
-                    { new Guid("6c0136a2-48d9-450f-9814-5cba270dce14"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380964674274", "Vlad Gromovij" },
-                    { new Guid("be067225-e418-4579-93cb-faaa705b57e0"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380965555555", "Charlie Davis" },
-                    { new Guid("f9a74d03-b637-4787-bdf2-930eff19c944"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380963554053", "Saller" }
+                    { new Guid("04b56cb5-c667-4063-a557-b26053f69e63"), new Guid("a7674d3f-d622-4656-9499-d46e0c7ea61a"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380964444444", "Bob Brown" },
+                    { new Guid("46028997-952e-4f9c-9282-4ebd7526ea9c"), new Guid("a7674d3f-d622-4656-9499-d46e0c7ea61a"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380961111111", "John Doe" },
+                    { new Guid("57322de4-860d-4c50-950a-0e88f87d096c"), new Guid("a7674d3f-d622-4656-9499-d46e0c7ea61a"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380962222222", "Jane Smith" },
+                    { new Guid("58f87ba8-627e-4898-b9cc-0a337739c8af"), new Guid("a7674d3f-d622-4656-9499-d46e0c7ea61a"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380965555555", "Charlie Davis" },
+                    { new Guid("6c0136a2-48d9-450f-9814-5cba270dce14"), new Guid("a7674d3f-d622-4656-9499-d46e0c7ea61a"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380964674274", "Vlad Gromovij" },
+                    { new Guid("6faba7f0-6e1c-42ab-bdce-8cc853535422"), new Guid("a7674d3f-d622-4656-9499-d46e0c7ea61a"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380963333333", "Alice Johnson" },
+                    { new Guid("aed6380d-6e7c-4051-a0a4-48a78f8af48b"), new Guid("a7674d3f-d622-4656-9499-d46e0c7ea61a"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380966666666", "David Evans" },
+                    { new Guid("f9a74d03-b637-4787-bdf2-930eff19c944"), new Guid("a7674d3f-d622-4656-9499-d46e0c7ea61a"), "$2a$11$1m1GjCBPIuOWxIbPWYNMYu8NvAPFkxJLIhr0x26NzVnSA905TAk4a", "+380963554053", "Saller" }
                 });
 
             migrationBuilder.InsertData(
@@ -251,6 +258,11 @@ namespace Messenger.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Chats_ActiveIconId",
+                table: "Chats",
+                column: "ActiveIconId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Chats_AdminId",
                 table: "Chats",
                 column: "AdminId");
@@ -266,10 +278,19 @@ namespace Messenger.DataAccess.Migrations
                 column: "User2Id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Files_MessageId",
+                name: "IX_Files_GroupChatId",
                 table: "Files",
-                column: "MessageId",
-                unique: true);
+                column: "GroupChatId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Files_MediaMessageId",
+                table: "Files",
+                column: "MediaMessageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Files_UserId",
+                table: "Files",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_ChatId",
@@ -290,16 +311,71 @@ namespace Messenger.DataAccess.Migrations
                 name: "IX_UserChats_ChatId",
                 table: "UserChats",
                 column: "ChatId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_ActiveAvatarId",
+                table: "Users",
+                column: "ActiveAvatarId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Chats_Files_ActiveIconId",
+                table: "Chats",
+                column: "ActiveIconId",
+                principalTable: "Files",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Chats_Users_AdminId",
+                table: "Chats",
+                column: "AdminId",
+                principalTable: "Users",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Chats_Users_User1Id",
+                table: "Chats",
+                column: "User1Id",
+                principalTable: "Users",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Chats_Users_User2Id",
+                table: "Chats",
+                column: "User2Id",
+                principalTable: "Users",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Files_Messages_MediaMessageId",
+                table: "Files",
+                column: "MediaMessageId",
+                principalTable: "Messages",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Files_Users_UserId",
+                table: "Files",
+                column: "UserId",
+                principalTable: "Users",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Connections");
+            migrationBuilder.DropForeignKey(
+                name: "FK_Chats_Files_ActiveIconId",
+                table: "Chats");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Users_Files_ActiveAvatarId",
+                table: "Users");
 
             migrationBuilder.DropTable(
-                name: "Files");
+                name: "Connections");
 
             migrationBuilder.DropTable(
                 name: "RoleEntityUserEntity");
@@ -311,10 +387,13 @@ namespace Messenger.DataAccess.Migrations
                 name: "UserRoles");
 
             migrationBuilder.DropTable(
-                name: "Messages");
+                name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "Files");
+
+            migrationBuilder.DropTable(
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "Chats");

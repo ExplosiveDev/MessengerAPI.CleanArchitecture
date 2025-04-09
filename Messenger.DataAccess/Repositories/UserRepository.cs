@@ -133,5 +133,27 @@ namespace Messenger.DataAccess.Repositories
             var mapped = _mapper.Map<List<User>>(usersEntity);
 			return mapped;
 		}
-	}
+
+        public async Task<List<User>> GetContacts(Guid userId)
+        {
+            var chatIds = await _context.UserChats
+                .AsNoTracking()
+                .Where(uc => uc.UserId == userId)
+                .Select(uc => uc.ChatId)
+                .ToListAsync();
+
+            var contacts = await _context.PrivateChats
+                .Include(c => c.User1)
+                .ThenInclude(c => c.ActiveAvatar)
+                .Include(c => c.User2)
+                .ThenInclude(c => c.ActiveAvatar)
+                .AsNoTracking()
+                .Where(pc => chatIds.Contains(pc.Id))
+                .Select(pc => pc.User1Id == userId ? pc.User2 : pc.User1)
+                .ToListAsync();
+
+			return _mapper.Map<List<User>>(contacts);
+
+        }
+    }
 }

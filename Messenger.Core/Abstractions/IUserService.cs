@@ -10,5 +10,6 @@ namespace Messenger.Application.Services
 		Task<bool> IsUniquePhone(string phone);
 		Task<User> GetById(Guid userId);
 		Task<List<User>> SearchByUserName(string userName);
+		Task<List<User>> GetContacts(Guid userId);
 	}
 }

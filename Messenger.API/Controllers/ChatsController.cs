@@ -1,6 +1,7 @@
 ﻿using Messenger.API.Contracts;
 using Messenger.Application.Services;
 using Messenger.Core.Models;
+using Messenger.DataAccess.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -85,6 +86,24 @@ namespace Messenger.API.Controllers
 
             return privateChat;
 
+        }
+
+        [Authorize]
+        [HttpPost("CreateGroupChat")]
+        public async Task<ActionResult<GroupChat>> CreateGroupChat([FromBody] CreateGroupChatRequest createGroupChatRequest)
+        {
+            var userId = User.FindFirst("userId")?.Value;
+
+            if (userId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+            List<string> userIds = createGroupChatRequest.selectedContacts.ToList();
+            var groupName = createGroupChatRequest.groupName;
+
+            var groupChat = await _chatService.CreateGroupChat(userId, userIds, groupName);
+
+            return Ok(groupChat);
         }
     }
 }
