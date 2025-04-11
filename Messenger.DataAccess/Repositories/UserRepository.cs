@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Linq;
+using AutoMapper;
 using Messenger.Core.Abstractions;
 using Messenger.Core.Enums;
 using Messenger.Core.Models;
@@ -154,6 +155,17 @@ namespace Messenger.DataAccess.Repositories
 
 			return _mapper.Map<List<User>>(contacts);
 
+        }
+
+        public async Task<string> ChangeUserFields(Guid userId, string newUserName)
+        {
+			var userEntity = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+			if (userEntity == null) return null;
+
+			userEntity.UserName = newUserName;
+			await _context.SaveChangesAsync();
+			return userEntity.UserName;
         }
     }
 }

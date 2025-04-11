@@ -72,5 +72,11 @@ namespace Messenger.Application.Services
 
 			return await _userRepository.GetContacts(userId);
         }
+
+        public async Task<string> ChangeUserFields(string userId, string newUserName)
+        {
+            Guid userIdGuid = Guid.Parse(userId);
+			return await _userRepository.ChangeUserFields(userIdGuid, newUserName);
+        }
     }
 }

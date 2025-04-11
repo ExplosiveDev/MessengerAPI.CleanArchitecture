@@ -82,6 +82,25 @@ namespace Messenger.API.Controllers
         }
 
 
+        [Authorize]
+        [HttpPost("ChangeUserFields")]
+        public async Task<ActionResult<string>> ChangeUserFields([FromBody]string newUserName) //поки просто string newUserName
+        {
+            var userId = User.FindFirst("userId")?.Value;
+
+            if (userId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            var userName = await _userService.ChangeUserFields(userId, newUserName);
+
+            if (userName == string.Empty || userName == null) return BadRequest(new { message = "Smth went wrong with changing user name" });
+
+            return Ok(userName);
+        }
+
+
 
     }
 }

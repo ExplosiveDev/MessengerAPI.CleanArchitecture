@@ -11,5 +11,7 @@ namespace Messenger.Application.Services
 		Task<User> GetById(Guid userId);
 		Task<List<User>> SearchByUserName(string userName);
 		Task<List<User>> GetContacts(Guid userId);
-	}
+		Task<string> ChangeUserFields(string userId, string newUserName);
+
+    }
 }
