@@ -276,5 +276,34 @@ namespace Messenger.DataAccess.Repositories
             return groupChat;
         }
 
+        public async Task<bool> IsChatOwner(Guid userId, Guid chatId)
+        {
+            var chatOwnerId = _context.GroupChat
+                .AsNoTracking()
+                .Include(c => c.Admin)
+                .FirstOrDefault(c => c.Id == chatId)
+                 .AdminId;
+
+            if(chatOwnerId == userId) return true;
+            return false;
+        }
+
+        public async Task<Guid> RemoveMember(Guid memberId, Guid chatId)
+        {
+            var chatEntity = _context.GroupChat
+                .Include(c => c.UserChats)
+                .FirstOrDefault(c => c.Id == chatId);
+
+            if (chatEntity == null)
+                throw new Exception("Chat not found");
+
+            var userChat = chatEntity.UserChats.FirstOrDefault(uc => uc.UserId == memberId);
+            if (userChat == null) return memberId;
+
+            chatEntity.UserChats.Remove(userChat);
+
+            await _context.SaveChangesAsync();
+            return memberId;
+        }
     }
 }

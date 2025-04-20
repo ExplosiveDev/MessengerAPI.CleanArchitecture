@@ -73,8 +73,20 @@ namespace Messenger.DataAccess.Repositories
 
 		public async Task<Connection> GetConnection(string connectionId)
 		{
-			var connectionEntity = _context.Connections.FirstOrDefault(x => x.ConnectionId == connectionId);
+			var connectionEntity = _context.Connections
+				.AsNoTracking()
+				.FirstOrDefault(x => x.ConnectionId == connectionId);
 			return _mapper.Map<Connection>(connectionEntity);
 		}
+
+        public async Task<Connection> GetConnectionByUserId(Guid userId)
+        {
+            var connectionEntity = _context.Connections.
+				AsNoTracking()
+				.FirstOrDefault(x => x.UserId == userId);
+
+            return _mapper.Map<Connection>(connectionEntity);
+
+        }
     }
 }

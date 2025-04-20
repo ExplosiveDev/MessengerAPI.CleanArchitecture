@@ -37,5 +37,10 @@ namespace Messenger.Application.Services
 			return await _connectionRepository.GetConnection(connectionId);
 		}
 
-	}
+        public async Task<Connection> GetConnectionByUserId(string userId)
+        {
+            var userGuid = Guid.Parse(userId);
+			return await _connectionRepository.GetConnectionByUserId(userGuid);
+        }
+    }
 }

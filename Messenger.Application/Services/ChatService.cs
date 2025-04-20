@@ -55,5 +55,23 @@ namespace Messenger.Application.Services
             return await _chatRepository.CreateGroupChat(ownerGuid, userGuids, groupName);
 
         }
+
+        public async Task<bool> IsChatOwner(string userId, string chatId)
+        {
+            Guid userGuid = Guid.Parse(userId);
+            Guid chatGuid = Guid.Parse(chatId);
+
+            return await _chatRepository.IsChatOwner(userGuid, chatGuid);
+            
+        }
+
+        public async Task<Guid> RemoveMember(string memberId, string chatId)
+        {
+            Guid chatGuid = Guid.Parse(chatId);
+            Guid memberGuid = Guid.Parse(memberId);
+
+            return await _chatRepository.RemoveMember(memberGuid, chatGuid);
+
+        }
     }
 }

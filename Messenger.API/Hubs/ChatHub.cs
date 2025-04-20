@@ -1,22 +1,21 @@
 ﻿using Messenger.Application.Services;
 using Messenger.Core.Models;
-using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
+using Connection = Messenger.Core.Models.Connection;
 
 namespace Messenger.API.Hubs
 {
     public record sendTextMessagePayload(string content, string senderId, string chatId);
     public record sendMediaMessagePayload(string caption, string fileId, string senderId, string chatId);
     public record messagesReadedPayload(string chatId, string userId, List<string> messegeIds);
+    public record removeChatPayload(string chatId, string userId);
     public interface IChatClient
     {
         public Task ReceiveMessage(Message message, int status);
         public Task ReceiveReadedMessageIds(IEnumerable<string> ids);
         public Task ReceiveSystemMessage(Message message);
+        public Task ReceiveRemovedChatId(string chatId);
     }
     public class ChatHub : Hub<IChatClient>
     {
@@ -72,6 +71,14 @@ namespace Messenger.API.Hubs
                 {
                     await Clients.Client(connection.ConnectionId).ReceiveMessage(mediaMessage, 200);
                 }
+            }
+        }
+
+        public async Task RemoveChat(removeChatPayload data)
+        {
+            Connection connection = await _connectionService.GetConnectionByUserId(data.userId);
+            if (connection is not null) {
+                await Clients.Client(connection.ConnectionId).ReceiveRemovedChatId(data.chatId);
             }
         }
 

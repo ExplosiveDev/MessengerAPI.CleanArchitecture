@@ -9,6 +9,7 @@ namespace Messenger.Application.Services
 		Task DeleteConnection(Guid userId);
         Task<List<Connection>> GetConnections(Guid chatId);
 		Task<Connection> GetConnection(string connectionId);
+		Task<Connection> GetConnectionByUserId(string userId);
 
 	}
 }

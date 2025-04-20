@@ -9,5 +9,6 @@ namespace Messenger.DataAccess.Repositories
 		Task<List<User>> GetMessageRecipientsAsync(Guid chatId);
         Task<List<Connection>> GetConnections(Guid chatId);
 		Task<Connection> GetConnection(string connectionId);
+		Task<Connection> GetConnectionByUserId(Guid userId);
 	}
 }

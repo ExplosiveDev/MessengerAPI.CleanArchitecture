@@ -11,5 +11,7 @@ namespace Messenger.Application.Services
         Task<PrivateChat> CreatePrivateChat(Guid user1Id, Guid user2Id);
         Task<GroupChat> CreateGroupChat(string ownerId, List<string> userIds, string groupName);
         Task<Chat> GetChat(Guid chatId, Guid userId);
+        Task<bool> IsChatOwner(string userId, string chatId);
+        Task<Guid> RemoveMember(string memberId, string chatId);
     }
 }

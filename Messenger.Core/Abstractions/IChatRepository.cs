@@ -11,5 +11,7 @@ namespace Messenger.DataAccess.Repositories
         Task<Chat> Get(Guid chatId);
         Task<PrivateChat> CreatePrivateChat(Guid user1Id, Guid user2Id);
         Task<GroupChat> CreateGroupChat(Guid ownerId, List<Guid> userIds, string groupName);
+        Task<bool> IsChatOwner(Guid userId, Guid chatId);
+        Task<Guid> RemoveMember(Guid memberId, Guid chatId);
     }
 }
