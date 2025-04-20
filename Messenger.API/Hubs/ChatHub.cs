@@ -6,7 +6,6 @@ using Connection = Messenger.Core.Models.Connection;
 
 namespace Messenger.API.Hubs
 {
-    public record sendTextMessagePayload(string content, string senderId, string chatId);
     public record sendMediaMessagePayload(string caption, string fileId, string senderId, string chatId);
     public record messagesReadedPayload(string chatId, string userId, List<string> messegeIds);
     public record removeChatPayload(string chatId, string userId);
@@ -20,18 +19,12 @@ namespace Messenger.API.Hubs
     public class ChatHub : Hub<IChatClient>
     {
         private readonly IConnectionService _connectionService;
-        private readonly IUserService _userService;
         private readonly IMessageService _messageService;
-        private readonly IChatService _chatService;
-        private readonly IFileService _fileService;
 
-       public ChatHub(IConnectionService connectionService, IUserService userService, IMessageService messageService, IFileService fileService, IChatService chatService)
+       public ChatHub(IConnectionService connectionService, IMessageService messageService)
         {
             _connectionService = connectionService;
-            _userService = userService;
             _messageService = messageService;
-            _fileService = fileService;
-            _chatService = chatService;
         }
 
         public async Task JoinChat(UserConnection connection)
@@ -44,14 +37,12 @@ namespace Messenger.API.Hubs
 
         }
 
-        public async Task SendTextMessage(sendTextMessagePayload data)
+        public async Task SendTextMessage(TextMessage textMessage)
         {
-            List<Connection> connections = await _connectionService.GetConnections(Guid.Parse(data.chatId));
-            var sender = await _userService.GetById(Guid.Parse(data.senderId));
+            List<Connection> connections = await _connectionService.GetConnections(textMessage.ChatId);
 
             if (connections is not null)
-            {
-                var textMessage = await _messageService.AddTextMessage(data.content, Guid.Parse(data.chatId), Guid.Parse(data.senderId));
+            {          
                 foreach (var connection in connections)
                 {
                     await Clients.Client(connection.ConnectionId).ReceiveMessage(textMessage, 200);
@@ -59,21 +50,17 @@ namespace Messenger.API.Hubs
             }
         }
 
-        public async Task SendMediaMessage(sendMediaMessagePayload data)
+        public async Task SendMediaMessage(MediaMessage mediaMessage)
         {
-            List<Connection> connections = await _connectionService.GetConnections(Guid.Parse(data.chatId));
-            var sender = await _userService.GetById(Guid.Parse(data.senderId));
+            List<Connection> connections = await _connectionService.GetConnections(mediaMessage.ChatId);
             if (connections is not null)
             {
-
-                var mediaMessage = await _messageService.AddMediaMessage(data.caption, Guid.Parse(data.fileId), Guid.Parse(data.senderId), Guid.Parse(data.chatId));
                 foreach (var connection in connections)
                 {
                     await Clients.Client(connection.ConnectionId).ReceiveMessage(mediaMessage, 200);
                 }
             }
         }
-
         public async Task RemoveChat(removeChatPayload data)
         {
             Connection connection = await _connectionService.GetConnectionByUserId(data.userId);

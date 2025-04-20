@@ -22,17 +22,21 @@ namespace Messenger.Application.Services
 			_fileRepository = fileRepository;
 		}
 
-		public async Task<TextMessage> AddTextMessage(string content, Guid chatId, Guid senderId)
+		public async Task<TextMessage> AddTextMessage(string content, string chatId, string senderId)
 		{
-			var textMessage = await _messageRepository.AddTextMessage(content, chatId, senderId);
-
+			var chatGuid = Guid.Parse(chatId);
+			var senderGuid = Guid.Parse(senderId);
+			var textMessage = await _messageRepository.AddTextMessage(content, chatGuid, senderGuid);
 			return textMessage;
 
         }
 
-		public async Task<MediaMessage> AddMediaMessage(string caption, Guid fileId, Guid senderId, Guid chatId)
+		public async Task<MediaMessage> AddMediaMessage(string caption, string fileId, string senderId, string chatId)
 		{
-			var mediaMessage = await _messageRepository.AddMediaMessage(caption, fileId, senderId, chatId);
+            var fileGuid = Guid.Parse(fileId);
+            var chatGuid = Guid.Parse(chatId);
+            var senderGuid = Guid.Parse(senderId);
+            var mediaMessage = await _messageRepository.AddMediaMessage(caption, fileGuid, senderGuid, chatGuid);
 
 			return mediaMessage;
 		}
