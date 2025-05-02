@@ -17,5 +17,6 @@ namespace Messenger.DataAccess.Repositories
         Task AddMembers(Guid chatId, List<Guid> userIds);
         Task<bool> IsChatExists(Guid chatId);
         Task<bool> IsChatMember(Guid chatId, Guid userId);
+        Task<List<PrivateChat>> GetPrivateChats(List<Guid> chatIds);
     }
 }

@@ -118,6 +118,15 @@ namespace Messenger.DataAccess.Repositories
 
 
         }
+        public async Task<List<PrivateChat>> GetPrivateChats(List<Guid> chatIds)
+        {
+            var privateChatEntities = await _context.PrivateChats
+                .AsNoTracking()
+                .Where(pc => chatIds.Contains(pc.Id))
+                .ToListAsync();
+
+            return _mapper.Map<List<PrivateChat>>(privateChatEntities);
+        }
 
         public async Task<List<Guid>> GetChatUserIds(Guid chatId)
         {
@@ -210,6 +219,7 @@ namespace Messenger.DataAccess.Repositories
         }
 
         public async Task<bool> IsChatExists(Guid chatId) => await _context.Chats.AnyAsync(c => c.Id == chatId);
+
         public async Task<bool> IsChatMember(Guid chatId, Guid userId) => await _context.UserChats.AnyAsync(uc => uc.UserId == userId && uc.ChatId == chatId);
 
     }

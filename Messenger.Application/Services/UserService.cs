@@ -13,12 +13,14 @@ namespace Messenger.Application.Services
 	public class UserService : IUserService
 	{
 		private readonly IUserRepository _userRepository;
-		private readonly IPasswordHasher _passwordHasher;
+        private readonly IChatRepository _chatRepository;
+        private readonly IPasswordHasher _passwordHasher;
 		private readonly IJwtProvider _jwtProvider;
 
-		public UserService(IUserRepository userRepository, IPasswordHasher passwordHasher, IJwtProvider jwtProvider)
+		public UserService(IUserRepository userRepository, IPasswordHasher passwordHasher, IJwtProvider jwtProvider, IChatRepository chatRepository)
 		{
 			_userRepository = userRepository;
+			_chatRepository = chatRepository;
 			_passwordHasher = passwordHasher;
 			_jwtProvider = jwtProvider;
 		}
@@ -34,10 +36,9 @@ namespace Messenger.Application.Services
 
 			return user;
 		}
-
 		public async Task<(User user, string token)> Login(string phone, string password)
 		{
-			var user = await _userRepository.GetByPhone(phone);
+			var user = await _userRepository.GetUserByPhoneWithAvatar(phone);
 
 			var result = _passwordHasher.Verify(password, user.PasswordHash);
 
@@ -56,27 +57,39 @@ namespace Messenger.Application.Services
 		{
 			return await _userRepository.IsUniquePhone(phone);
 		}
-
-		public async Task<User> GetById(Guid userId)
+		public async Task<User> Get(string userId)
 		{
-			return await _userRepository.GetUserWithAvatar(userId);
+            var userGuid = Guid.Parse(userId);
+            return await _userRepository.GetUserWithAvatar(userGuid);
 		}
 		public async Task<List<User>> SearchByUserName(string userName)
 		{
-			return await _userRepository.SearchByUserName(userName);
+			return await _userRepository.GetByUserNameWithAvatar(userName);
 		}
-
-        public async Task<List<User>> GetContacts(Guid userId)
+        public async Task<List<User>> GetContacts(string userId)
         {
-            if(await _userRepository.GetUserWithAvatar(userId) == null) return null;
+			var userGuid = Guid.Parse(userId);
+            if (!await _userRepository.IsUserExists(userGuid)) throw new ArgumentException("Користувач не знайдений", nameof(userGuid));
 
-			return await _userRepository.GetContacts(userId);
+            var chatIds = await _chatRepository.GetUserChatIds(userGuid);
+
+			var privateChats = await _chatRepository.GetPrivateChats(chatIds);
+
+			var contactIds = privateChats
+				.Select(pc => pc.User1Id == userGuid ? pc.User2Id : pc.User1Id)
+				.Select(u => u)
+				.ToList();
+
+			var contacts = await _userRepository.GetUsersWithAvatars(contactIds);
+
+            return contacts;
         }
-
         public async Task<string> ChangeUserFields(string userId, string newUserName)
         {
-            Guid userIdGuid = Guid.Parse(userId);
-			return await _userRepository.ChangeUserFields(userIdGuid, newUserName);
+            Guid userGuid = Guid.Parse(userId);
+            if (!await _userRepository.IsUserExists(userGuid)) throw new ArgumentException("Користувач не знайдений", nameof(userGuid));
+
+            return await _userRepository.ChangeUserFields(userGuid, newUserName);
         }
     }
 }

@@ -95,7 +95,7 @@ namespace Messenger.API.Controllers
                 return Unauthorized("Invalid token");
             }
 
-            var user = await _userService.GetById(Guid.Parse(userId));
+            var user = await _userService.Get(userId);
 
             if (user == null)
             {

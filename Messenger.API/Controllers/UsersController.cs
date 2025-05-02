@@ -3,9 +3,7 @@ using Messenger.API.Contracts;
 using Messenger.Application.Services;
 using Messenger.Core.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Messenger.API.Controllers
 {
@@ -14,13 +12,11 @@ namespace Messenger.API.Controllers
 	public class UsersController : ControllerBase
 	{
 		private readonly IUserService _userService;
-		private readonly IHttpContextAccessor _context;
 		private readonly IMapper _mapper;
 
-		public UsersController(IUserService userService, IHttpContextAccessor context, IMapper mapper)
+		public UsersController(IUserService userService, IMapper mapper)
 		{
 			_userService = userService;
-			_context = context;
 			_mapper = mapper;
 		}
 
@@ -74,7 +70,7 @@ namespace Messenger.API.Controllers
                 return Unauthorized("Invalid token");
             }
 
-			var contacts = await _userService.GetContacts(Guid.Parse(userId));
+			var contacts = await _userService.GetContacts(userId);
 
 			if (contacts == null) return BadRequest(new { message = "Smth went wrong..." });
 
