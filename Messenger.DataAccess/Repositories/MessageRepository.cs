@@ -16,29 +16,8 @@ namespace Messenger.DataAccess.Repositories
             _mapper = mapper;
         }
 
-        private async Task ValidateMessageConditions(Guid chatId, Guid senderId)
-        {
-            // 1. Перевірка користувача
-            var senderExists = await _context.Users.AnyAsync(u => u.Id == senderId);
-            if (!senderExists)
-                throw new ArgumentException("Користувач не знайдений", nameof(senderId));
-
-            // 2. Перевірка чату
-            var chatExists = await _context.Chats.AnyAsync(c => c.Id == chatId);
-            if (!chatExists)
-                throw new ArgumentException("Чат не знайдено", nameof(chatId));
-
-            // 3. Перевірка учасника чату
-            bool isMember = await _context.UserChats
-                .AnyAsync(uc => uc.UserId == senderId && uc.ChatId == chatId);
-
-            if (!isMember)
-                throw new ArgumentException("Користувач не є учасником чату", nameof(senderId));
-        }
-
         public async Task<TextMessage> AddTextMessage(string content, Guid chatId, Guid senderId)
         {
-            await ValidateMessageConditions(chatId, senderId);
 
             var textMessageEntity = new TextMessageEntity
             {
@@ -50,12 +29,12 @@ namespace Messenger.DataAccess.Repositories
 
             _context.TextMessages.Add(textMessageEntity);
             await _context.SaveChangesAsync();
+
             return _mapper.Map<TextMessage>(textMessageEntity);
         }
 
         public async Task<MediaMessage> AddMediaMessage(string caption, Guid fileId, Guid senderId, Guid chatId)
         {
-            await ValidateMessageConditions(chatId, senderId);
 
             var fileEntity = await _context.Files
                 .FirstOrDefaultAsync(f => f.Id == fileId);
@@ -80,18 +59,7 @@ namespace Messenger.DataAccess.Repositories
             return _mapper.Map<MediaMessage>(mediaMessageEntity);
         }
 
-
-
-        public async Task<List<Message>> Get()
-        {
-            var messagesEntity = await _context.Messages
-                .AsNoTracking()
-                .ToListAsync();
-
-            return _mapper.Map<List<Message>>(messagesEntity);
-        }
-
-        private async Task<List<Guid>> GetMessageIds(Guid chatId)
+        public async Task<List<Guid>> GetChatMessageIds(Guid chatId)
         {
             var ids = await _context.Messages
                 .Where(m => m.ChatId == chatId)
@@ -102,27 +70,26 @@ namespace Messenger.DataAccess.Repositories
             return ids;
         }
 
-        public async Task<SearchedMessages> GetMessagesByChatId(Guid chatId)
-        { 
-            var mesageIds = await GetMessageIds(chatId);
-
+        public async Task<List<TextMessage>> GetTextMessages(List<Guid> messageIds) 
+        {
             var textMessagesEntity = await _context.Messages
                 .OfType<TextMessageEntity>()
-                .Where(m => mesageIds.Contains(m.Id))
+                .Where(m => messageIds.Contains(m.Id))
                 .AsNoTracking()
                 .ToListAsync();
 
+            return _mapper.Map<List<TextMessage>>(textMessagesEntity);
+        }
+
+        public async Task<List<MediaMessage>> GetMediaMessages(List<Guid> messageIds)
+        {
             var mediaMessagesEntity = await _context.Messages
                 .OfType<MediaMessageEntity>()
-                .Where(m => mesageIds.Contains(m.Id))
-                .Include(m => m.Content)
+                .Where(m => messageIds.Contains(m.Id))
                 .AsNoTracking()
                 .ToListAsync();
 
-            var textMessages = _mapper.Map<List<TextMessage>>(textMessagesEntity);
-            var mediaMessages = _mapper.Map<List<MediaMessage>>(mediaMessagesEntity);
-
-            return new SearchedMessages {TextMessages = textMessages, MediaMessages = mediaMessages };
+            return _mapper.Map<List<MediaMessage>>(mediaMessagesEntity);
         }
 
         public async Task SetIsReaded(List<Guid> ids)
@@ -132,6 +99,7 @@ namespace Messenger.DataAccess.Repositories
                 .ToListAsync();
 
             messagesEntity.ForEach((MessageEntity msg) => { msg.IsReaded = true; });
+
             await _context.SaveChangesAsync();
 
         }

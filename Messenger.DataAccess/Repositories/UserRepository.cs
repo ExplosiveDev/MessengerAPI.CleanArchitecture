@@ -189,5 +189,8 @@ namespace Messenger.DataAccess.Repositories
 			await _context.SaveChangesAsync();
 			return userEntity.UserName;
         }
+
+        public async Task<bool> IsUserExists(Guid userId) => await _context.Users.AnyAsync(c => c.Id == userId);
+
     }
 }

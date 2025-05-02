@@ -4,7 +4,6 @@ using Messenger.Core.Models;
 using Messenger.DataAccess.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace Messenger.API.Controllers
 {
@@ -34,7 +33,7 @@ namespace Messenger.API.Controllers
                 return BadRequest("Search name cannot be empty");
             }
 
-            var searchedGlobalChats = await _chatService.GetGlobalChatsByName(Guid.Parse(userId), name);
+            var searchedGlobalChats = await _chatService.GetGlobalChatsByName(userId, name);
 
             return Ok(searchedGlobalChats);
         }
@@ -50,7 +49,7 @@ namespace Messenger.API.Controllers
                 return Unauthorized("Invalid token");
             }
 
-            var savedChats = await _chatService.GetSavedChats(Guid.Parse(userId));
+            var savedChats = await _chatService.GetSavedChats(userId);
 
             return Ok(savedChats);
         }
@@ -65,7 +64,7 @@ namespace Messenger.API.Controllers
             {
                 return Unauthorized("Invalid token");
             }
-            var chat = await _chatService.GetChat(Guid.Parse(chatId), Guid.Parse(userId));
+            var chat = await _chatService.GetChat(chatId, userId);
 
             return Ok(chat);
         }
@@ -80,7 +79,7 @@ namespace Messenger.API.Controllers
             {
                 return Unauthorized("Invalid token");
             }
-            var privateChat = await _chatService.CreatePrivateChat(Guid.Parse(userId), Guid.Parse(user2Id));
+            var privateChat = await _chatService.CreatePrivateChat(userId, user2Id);
 
             if (privateChat == null) return BadRequest("One or both users do not exist.");
 

@@ -19,5 +19,6 @@ namespace Messenger.Core.Abstractions
         Task<List<User>> GetContacts(Guid userId);
 		Task<string> ChangeUserFields(Guid userId, string newUserName);
         Task<List<User>> GetUsersByNameWithAvatar(string userName);
+        Task<bool> IsUserExists(Guid userId);
     }
 }

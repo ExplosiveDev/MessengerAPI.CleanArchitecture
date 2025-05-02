@@ -30,6 +30,7 @@ namespace Messenger.DataAccess.Repositories
 
             return _mapper.Map<List<GroupChat>>(groupChatsEntity);
         }
+
         private async Task GetDefaultGroupIcon(GroupChatEntity userEntity)
         {
             var defaultAvatar = await _context.Files.FirstOrDefaultAsync(f => f.FileName == "groups.png");
@@ -39,9 +40,9 @@ namespace Messenger.DataAccess.Repositories
                 userEntity.ActiveIconId = defaultAvatar.Id;
             }
         }
+
         public async Task<(Message, int)> GetLastMessageAndCountOfUnreaded(Guid chatId, Guid userId)
         {
-
             //*При викорисатнні await з ToListAsync вилітає Exeption
             var messagesEnity = _context.Messages
                 .Where(m => m.ChatId == chatId)
@@ -66,6 +67,7 @@ namespace Messenger.DataAccess.Repositories
             };
             return (resultMessage, unreadCount);
         }
+
         public async Task<PrivateChat> CreatePrivateChat(Guid user1Id, Guid user2Id)
         {
             var newPrivateChatEntity = new PrivateChatEntity()
@@ -88,6 +90,7 @@ namespace Messenger.DataAccess.Repositories
 
             return _mapper.Map<PrivateChat>(privateChatEntity);
         }
+
         public async Task<Chat> Get(Guid chatId)
         {
             var privateChatEntity = await _context.Chats
@@ -95,9 +98,9 @@ namespace Messenger.DataAccess.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == chatId);
 
-            if(privateChatEntity != null)
+            if (privateChatEntity != null)
             {
-                return _mapper.Map<PrivateChat>(privateChatEntity); 
+                return _mapper.Map<PrivateChat>(privateChatEntity);
             }
 
             var groupChatEntity = await _context.Chats
@@ -106,7 +109,7 @@ namespace Messenger.DataAccess.Repositories
                  .AsNoTracking()
                  .FirstOrDefaultAsync(c => c.Id == chatId);
 
-            if (groupChatEntity != null) 
+            if (groupChatEntity != null)
             {
                 return _mapper.Map<GroupChat>(groupChatEntity);
             }
@@ -115,6 +118,7 @@ namespace Messenger.DataAccess.Repositories
 
 
         }
+
         public async Task<List<Guid>> GetChatUserIds(Guid chatId)
         {
             return await _context.UserChats
@@ -122,6 +126,7 @@ namespace Messenger.DataAccess.Repositories
                 .Select(uc => uc.UserId)
                 .ToListAsync();
         }
+
         public async Task<List<Guid>> GetUserChatIds(Guid userId)
         {
             return await _context.UserChats
@@ -129,11 +134,13 @@ namespace Messenger.DataAccess.Repositories
                 .Select(uc => uc.ChatId)
                 .ToListAsync();
         }
+
         public async Task AddMember(Guid chatId, Guid userId)
         {
             _context.UserChats.Add(new UserChatEntity { ChatId = chatId, UserId = userId });
             await _context.SaveChangesAsync();
         }
+
         public async Task AddMembers(Guid chatId, List<Guid> userIds)
         {
             var userChatEntities = userIds.Select(u => new UserChatEntity
@@ -147,6 +154,7 @@ namespace Messenger.DataAccess.Repositories
             await _context.SaveChangesAsync();
 
         }
+
         public async Task<GroupChat> CreateGroupChat(Guid ownerId, string groupName)
         {
             var newGroupChatEntity = new GroupChatEntity()
@@ -162,6 +170,7 @@ namespace Messenger.DataAccess.Repositories
 
             return groupChat;
         }
+
         public async Task<bool> IsChatOwner(Guid userId, Guid chatId)
         {
             var groupChat = _context.GroupChat
@@ -171,18 +180,20 @@ namespace Messenger.DataAccess.Repositories
             if (groupChat != null && groupChat.AdminId == userId) return true;
             return false;
         }
+
         public async Task<Guid> RemoveMember(Guid memberId, Guid chatId)
         {
             var chatEntity = _context.UserChats
                 .FirstOrDefault(uc => uc.UserId == memberId && uc.ChatId == chatId);
 
-            if(chatEntity == null) return Guid.Empty;
+            if (chatEntity == null) return Guid.Empty;
 
             _context.UserChats.Remove(chatEntity);
             await _context.SaveChangesAsync();
 
             return memberId;
         }
+
         public async Task<string> ChangeChatName(string newChatName, Guid chatId)
         {
             var chatEntity = _context.GroupChat
@@ -197,5 +208,9 @@ namespace Messenger.DataAccess.Repositories
 
             return chatEntity.GroupName;
         }
+
+        public async Task<bool> IsChatExists(Guid chatId) => await _context.Chats.AnyAsync(c => c.Id == chatId);
+        public async Task<bool> IsChatMember(Guid chatId, Guid userId) => await _context.UserChats.AnyAsync(uc => uc.UserId == userId && uc.ChatId == chatId);
+
     }
 }

@@ -73,5 +73,8 @@ namespace Messenger.DataAccess.Repositories
 
             return _mapper.Map<MyFile>(fileEntity);
         }
+
+        public async Task<bool> IsFileExists(Guid fileId) => await _context.Chats.AnyAsync(c => c.Id == fileId);
+
     }
 }

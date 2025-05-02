@@ -16,23 +16,26 @@ namespace Messenger.Application.Services
             _userRepository = userRepository;
         }
 
-        public async Task<SearchedChats> GetSavedChats(Guid userId)
+        public async Task<SearchedChats> GetSavedChats(string userId)
         {
-            var chatIds = await _chatRepository.GetUserChatIds(userId);
+            Guid userGuid = Guid.Parse(userId);
+
+            var chatIds = await _chatRepository.GetUserChatIds(userGuid);
 
             var savedChats = new SearchedChats
             {
+
                 PrivateChats = [],
                 GroupChats = []
             };
 
-            foreach (var chatId in chatIds) 
+            foreach (var chatId in chatIds)
             {
                 var chat = await _chatRepository.Get(chatId);
-                if (chat is PrivateChat privateChat) 
+                if (chat is PrivateChat privateChat)
                     savedChats.PrivateChats.Add(chat as PrivateChat);
 
-                if (chat is GroupChat groupChat) 
+                if (chat is GroupChat groupChat)
                     savedChats.GroupChats.Add(chat as GroupChat);
             }
 
@@ -58,7 +61,7 @@ namespace Messenger.Application.Services
                 chat.User1 = users.FirstOrDefault(u => u.Id == chat.User1Id);
                 chat.User2 = users.FirstOrDefault(u => u.Id == chat.User2Id);
 
-                var (lastMessage, unreaded) = await _chatRepository.GetLastMessageAndCountOfUnreaded(chat.Id, userId);
+                var (lastMessage, unreaded) = await _chatRepository.GetLastMessageAndCountOfUnreaded(chat.Id, userGuid);
                 chat.TopMessage = lastMessage;
                 chat.UnReaded = unreaded;
             }
@@ -70,7 +73,7 @@ namespace Messenger.Application.Services
                     userChat.User = users.FirstOrDefault(u => u.Id == userChat.UserId);
                 }
 
-                var (lastMessage, unreaded) = await _chatRepository.GetLastMessageAndCountOfUnreaded(groupChat.Id, userId);
+                var (lastMessage, unreaded) = await _chatRepository.GetLastMessageAndCountOfUnreaded(groupChat.Id, userGuid);
                 groupChat.TopMessage = lastMessage;
                 groupChat.UnReaded = unreaded;
             }
@@ -78,11 +81,12 @@ namespace Messenger.Application.Services
             return savedChats;
         }
 
-        public async Task<SearchedChats> GetGlobalChatsByName(Guid requesterUserId, string userName)
+        public async Task<SearchedChats> GetGlobalChatsByName(string requesterUserId, string userName)
         {
-            var requesterUser = await _userRepository.GetUserWithAvatar(requesterUserId);
+            Guid requesterUserGuid = Guid.Parse(requesterUserId);
+            var requesterUser = await _userRepository.GetUserWithAvatar(requesterUserGuid);
             var users = await _userRepository.GetUsersByNameWithAvatar(userName);
-            users.RemoveAll(u => u.Id == requesterUserId);
+            users.RemoveAll(u => u.Id == requesterUserGuid);
 
             List<PrivateChat> privateChats = [];
             foreach (var user in users)
@@ -107,23 +111,29 @@ namespace Messenger.Application.Services
             return searchedChats;
         }
 
-        public async Task<PrivateChat> CreatePrivateChat(Guid user1Id, Guid user2Id)
+        public async Task<PrivateChat> CreatePrivateChat(string user1Id, string user2Id)
         {
-            var user1 = await _userRepository.GetUserWithAvatar(user1Id);
-            var user2 = await _userRepository.GetUserWithAvatar(user2Id);
+            Guid user1Guid = Guid.Parse(user1Id);
+            Guid user2Guid = Guid.Parse(user2Id);
+
+            var user1 = await _userRepository.GetUserWithAvatar(user1Guid);
+            var user2 = await _userRepository.GetUserWithAvatar(user2Guid);
 
             if (user1 == null || user2 == null) throw new ArgumentException("User not found.");
 
-            var privateChat = await _chatRepository.CreatePrivateChat(user1Id, user2Id);
+            var privateChat = await _chatRepository.CreatePrivateChat(user1Guid, user2Guid);
             privateChat.User1 = user1;
             privateChat.User2 = user2;
 
             return privateChat;
         }
 
-        public async Task<Chat> GetChat(Guid chatId, Guid userId)
+        public async Task<Chat> GetChat(string chatId, string userId)
         {
-            var chat = await _chatRepository.Get(chatId);
+            Guid chatGuid = Guid.Parse(chatId);
+            Guid userGuid = Guid.Parse(userId);
+
+            var chat = await _chatRepository.Get(chatGuid);
             if (chat is PrivateChat privateChat)
             {
                 privateChat.User1 = await _userRepository.GetUserWithAvatar(privateChat.User1Id);
@@ -132,12 +142,12 @@ namespace Messenger.Application.Services
 
             if (chat is GroupChat groupChat)
             {
-                var userIds = await _chatRepository.GetChatUserIds(chatId);
+                var userIds = await _chatRepository.GetChatUserIds(chatGuid);
                 var users = await _userRepository.GetUsersWithAvatars(userIds);
                 groupChat.UserChats = users.Select(u => new UserChat { User = u, UserId = u.Id }).ToList();
             }
 
-            var (lastMessage, unreaded) = await _chatRepository.GetLastMessageAndCountOfUnreaded(chat.Id, userId);
+            var (lastMessage, unreaded) = await _chatRepository.GetLastMessageAndCountOfUnreaded(chat.Id, userGuid);
             chat.TopMessage = lastMessage;
             chat.UnReaded = unreaded;
 
