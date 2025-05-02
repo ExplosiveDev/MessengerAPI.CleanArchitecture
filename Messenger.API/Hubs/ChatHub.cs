@@ -2,29 +2,35 @@
 using Messenger.Core.Models;
 using Microsoft.AspNetCore.SignalR;
 using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Connection = Messenger.Core.Models.Connection;
 
 namespace Messenger.API.Hubs
 {
-    public record sendMediaMessagePayload(string caption, string fileId, string senderId, string chatId);
     public record messagesReadedPayload(string chatId, string userId, List<string> messegeIds);
     public record removeChatPayload(string chatId, string userId);
+    public record changeChatName(string chatId, string newChatName);
+    public record sendNewChat(string chatId, List<string> newMemberIds);
     public interface IChatClient
     {
         public Task ReceiveMessage(Message message, int status);
         public Task ReceiveReadedMessageIds(IEnumerable<string> ids);
         public Task ReceiveSystemMessage(Message message);
         public Task ReceiveRemovedChatId(string chatId);
+        public Task ReceiveNewChatName(string chatId, string newChatName);
+        public Task ReceiveNewChat(string chatId);
     }
     public class ChatHub : Hub<IChatClient>
     {
         private readonly IConnectionService _connectionService;
         private readonly IMessageService _messageService;
+        private readonly IChatService _chatService;
 
-       public ChatHub(IConnectionService connectionService, IMessageService messageService)
+        public ChatHub(IConnectionService connectionService, IMessageService messageService, IChatService chatService)
         {
             _connectionService = connectionService;
             _messageService = messageService;
+            _chatService = chatService;
         }
 
         public async Task JoinChat(UserConnection connection)
@@ -66,6 +72,39 @@ namespace Messenger.API.Hubs
             Connection connection = await _connectionService.GetConnectionByUserId(data.userId);
             if (connection is not null) {
                 await Clients.Client(connection.ConnectionId).ReceiveRemovedChatId(data.chatId);
+            }
+        }
+
+        public async Task ChangeChatName(changeChatName data)
+        {
+            List<Connection> connections = await _connectionService.GetConnections(Guid.Parse(data.chatId));
+            if (connections is not null)
+            {
+                foreach (var connection in connections)
+                {
+                    await Clients.Client(connection.ConnectionId).ReceiveNewChatName(data.chatId, data.newChatName);
+                }
+            }
+        }
+
+        public async Task SendNewChat(sendNewChat data)
+        {
+            if (data.newMemberIds.Count == 0) return;
+            List<Connection> connections = [];
+            foreach (var memberId in data.newMemberIds)
+            {
+                connections.Add(await _connectionService.GetConnectionByUserId(memberId));
+            }
+
+            if (connections is not null)
+            {
+                foreach (var connection in connections)
+                {
+                    if(connection is not null)
+                    {
+                        await Clients.Client(connection.ConnectionId).ReceiveNewChat(data.chatId);
+                    }
+                }
             }
         }
 

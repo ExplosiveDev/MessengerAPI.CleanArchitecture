@@ -12,10 +12,12 @@ namespace Messenger.Core.Abstractions
 	{
 		public Task Add(User user);
 		public Task<User> GetByPhone(string email);
-		Task<User> GetById(Guid userId);
-		public Task<bool> IsUniquePhone(string email);
+		Task<User> GetUserWithAvatar(Guid userId);
+        Task<List<User>> GetUsersWithAvatars(List<Guid> userIds);
+        public Task<bool> IsUniquePhone(string email);
 		Task<List<User>> SearchByUserName(string userName);
         Task<List<User>> GetContacts(Guid userId);
 		Task<string> ChangeUserFields(Guid userId, string newUserName);
+        Task<List<User>> GetUsersByNameWithAvatar(string userName);
     }
 }

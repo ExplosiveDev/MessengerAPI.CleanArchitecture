@@ -107,8 +107,8 @@ namespace Messenger.API.Controllers
         }
 
         [Authorize]
-        [HttpPost("RemoveMember")]
-        public async Task<ActionResult> RemoveMember([FromBody] RemoveMemberRequest data)
+        [HttpPost("AddMembers")]
+        public async Task<ActionResult<List<User>>> AddMembers([FromBody] AddMembersRequest data)
         {
             var userId = User.FindFirst("userId")?.Value;
 
@@ -119,8 +119,47 @@ namespace Messenger.API.Controllers
 
             if(await _chatService.IsChatOwner(userId, data.chatId))
             {
+                var members = await _chatService.AddMembers(data.memberIds, data.chatId);
+                if(members.Count > 0) return Ok(members);
+            }
+
+            return BadRequest();
+        }
+        [Authorize]
+        [HttpPost("RemoveMember")]
+        public async Task<ActionResult> RemoveMember([FromBody] RemoveMemberRequest data)
+        {
+            var userId = User.FindFirst("userId")?.Value;
+
+            if (userId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            if (await _chatService.IsChatOwner(userId, data.chatId))
+            {
                 var memberGuid = await _chatService.RemoveMember(data.memberId, data.chatId);
-                if(memberGuid != Guid.Empty) return Ok(memberGuid);
+                if (memberGuid != Guid.Empty) return Ok(memberGuid);
+            }
+
+            return BadRequest();
+        }
+
+        [Authorize]
+        [HttpPost("ChangeChatName")]
+        public async Task<ActionResult> ChangeChatName([FromBody] ChangeChatNameRequest data)
+        {
+            var userId = User.FindFirst("userId")?.Value;
+
+            if (userId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            if (await _chatService.IsChatOwner(userId, data.chatId))
+            {
+                var newChatName = await _chatService.ChangeChatName(data.newName, data.chatId);
+                if (newChatName != null) return Ok(newChatName);
             }
 
             return BadRequest();

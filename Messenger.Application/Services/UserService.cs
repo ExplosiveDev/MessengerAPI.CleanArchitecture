@@ -59,7 +59,7 @@ namespace Messenger.Application.Services
 
 		public async Task<User> GetById(Guid userId)
 		{
-			return await _userRepository.GetById(userId);
+			return await _userRepository.GetUserWithAvatar(userId);
 		}
 		public async Task<List<User>> SearchByUserName(string userName)
 		{
@@ -68,7 +68,7 @@ namespace Messenger.Application.Services
 
         public async Task<List<User>> GetContacts(Guid userId)
         {
-            if(await _userRepository.GetById(userId) == null) return null;
+            if(await _userRepository.GetUserWithAvatar(userId) == null) return null;
 
 			return await _userRepository.GetContacts(userId);
         }

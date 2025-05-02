@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 using Messenger.Core.Abstractions;
 using Messenger.Core.Models;
 using Messenger.DataAccess.Entities;
 using Messenger.DataAccess.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Messenger.Application.Services
 {
@@ -23,37 +18,152 @@ namespace Messenger.Application.Services
 
         public async Task<SearchedChats> GetSavedChats(Guid userId)
         {
-            return await _chatRepository.GetSavedChats(userId);
+            var chatIds = await _chatRepository.GetUserChatIds(userId);
+
+            var savedChats = new SearchedChats
+            {
+                PrivateChats = [],
+                GroupChats = []
+            };
+
+            foreach (var chatId in chatIds) 
+            {
+                var chat = await _chatRepository.Get(chatId);
+                if (chat is PrivateChat privateChat) 
+                    savedChats.PrivateChats.Add(chat as PrivateChat);
+
+                if (chat is GroupChat groupChat) 
+                    savedChats.GroupChats.Add(chat as GroupChat);
+            }
+
+            var userIds = new HashSet<Guid>();
+
+            foreach (var chat in savedChats.PrivateChats)
+            {
+                userIds.Add(chat.User1Id);
+                userIds.Add(chat.User2Id);
+            }
+
+            foreach (var groupChat in savedChats.GroupChats)
+            {
+                var groupUserIds = await _chatRepository.GetChatUserIds(groupChat.Id);
+                groupChat.UserChats = groupUserIds.Select(u => new UserChat { UserId = u }).ToList();
+                groupUserIds.ForEach((userId) => userIds.Add(userId));
+            }
+
+            var users = await _userRepository.GetUsersWithAvatars(userIds.ToList());
+
+            foreach (var chat in savedChats.PrivateChats)
+            {
+                chat.User1 = users.FirstOrDefault(u => u.Id == chat.User1Id);
+                chat.User2 = users.FirstOrDefault(u => u.Id == chat.User2Id);
+
+                var (lastMessage, unreaded) = await _chatRepository.GetLastMessageAndCountOfUnreaded(chat.Id, userId);
+                chat.TopMessage = lastMessage;
+                chat.UnReaded = unreaded;
+            }
+
+            foreach (var groupChat in savedChats.GroupChats)
+            {
+                foreach (var userChat in groupChat.UserChats)
+                {
+                    userChat.User = users.FirstOrDefault(u => u.Id == userChat.UserId);
+                }
+
+                var (lastMessage, unreaded) = await _chatRepository.GetLastMessageAndCountOfUnreaded(groupChat.Id, userId);
+                groupChat.TopMessage = lastMessage;
+                groupChat.UnReaded = unreaded;
+            }
+
+            return savedChats;
         }
 
-        public async Task<SearchedChats> GetGlobalChatsByName(Guid currentUserId, string name)
+        public async Task<SearchedChats> GetGlobalChatsByName(Guid requesterUserId, string userName)
         {
-            return await _chatRepository.GetGlobalChatsByName(currentUserId, name);
+            var requesterUser = await _userRepository.GetUserWithAvatar(requesterUserId);
+            var users = await _userRepository.GetUsersByNameWithAvatar(userName);
+            users.RemoveAll(u => u.Id == requesterUserId);
+
+            List<PrivateChat> privateChats = [];
+            foreach (var user in users)
+            {
+                PrivateChat privateChat = new PrivateChat()
+                {
+                    Id = Guid.NewGuid(),
+                    User1Id = user.Id,
+                    User1 = user,
+                    User2Id = requesterUser.Id,
+                    User2 = requesterUser,
+                };
+                privateChats.Add(privateChat);
+            }
+
+            SearchedChats searchedChats = new SearchedChats()
+            {
+                PrivateChats = privateChats,
+                GroupChats = []
+            };
+
+            return searchedChats;
         }
 
         public async Task<PrivateChat> CreatePrivateChat(Guid user1Id, Guid user2Id)
         {
-            var user1 = await _userRepository.GetById(user1Id);
-            var user2 = await _userRepository.GetById(user2Id);
+            var user1 = await _userRepository.GetUserWithAvatar(user1Id);
+            var user2 = await _userRepository.GetUserWithAvatar(user2Id);
 
-            // Перевірка, чи існують користувачі
-            if (user1 == null || user2 == null) return null;
-            return await _chatRepository.CreatePrivateChat(user1Id, user2Id);
+            if (user1 == null || user2 == null) throw new ArgumentException("User not found.");
+
+            var privateChat = await _chatRepository.CreatePrivateChat(user1Id, user2Id);
+            privateChat.User1 = user1;
+            privateChat.User2 = user2;
+
+            return privateChat;
         }
 
         public async Task<Chat> GetChat(Guid chatId, Guid userId)
         {
-            return await _chatRepository.Get(chatId, userId);   
+            var chat = await _chatRepository.Get(chatId);
+            if (chat is PrivateChat privateChat)
+            {
+                privateChat.User1 = await _userRepository.GetUserWithAvatar(privateChat.User1Id);
+                privateChat.User2 = await _userRepository.GetUserWithAvatar(privateChat.User2Id);
+            }
+
+            if (chat is GroupChat groupChat)
+            {
+                var userIds = await _chatRepository.GetChatUserIds(chatId);
+                var users = await _userRepository.GetUsersWithAvatars(userIds);
+                groupChat.UserChats = users.Select(u => new UserChat { User = u, UserId = u.Id }).ToList();
+            }
+
+            var (lastMessage, unreaded) = await _chatRepository.GetLastMessageAndCountOfUnreaded(chat.Id, userId);
+            chat.TopMessage = lastMessage;
+            chat.UnReaded = unreaded;
+
+            return chat;
         }
 
         public async Task<GroupChat> CreateGroupChat(string ownerId, List<string> userIds, string groupName)
         {
             Guid ownerGuid = Guid.Parse(ownerId);
-            List<Guid> userGuids = userIds.Select(u => Guid.Parse(u)).ToList();
-            var owner = await _userRepository.GetById(ownerGuid);
-            if(owner == null || userGuids == null) return null;
-            return await _chatRepository.CreateGroupChat(ownerGuid, userGuids, groupName);
+            var ownerUser = await _userRepository.GetUserWithAvatar(ownerGuid);
+            if (ownerUser == null) throw new ArgumentException("Owner user not found.");
 
+            List<Guid> userGuids = userIds.Select(Guid.Parse).ToList();
+            var chatMembers = await _userRepository.GetUsersWithAvatars(userGuids);
+            if (chatMembers.Count != userIds.Count) throw new ArgumentException("One or more users not found.");
+
+            var groupChat = await _chatRepository.CreateGroupChat(ownerGuid, groupName);
+            if (groupChat == null) throw new ArgumentException("Error with creating chat.");
+
+            userGuids.Add(ownerGuid);
+            chatMembers.Add(ownerUser);
+            await _chatRepository.AddMembers(groupChat.Id, userGuids);
+
+            chatMembers.ForEach(chatMember => groupChat.UserChats.Add(new UserChat { User = chatMember, ChatId = groupChat.Id }));
+
+            return groupChat;
         }
 
         public async Task<bool> IsChatOwner(string userId, string chatId)
@@ -62,7 +172,6 @@ namespace Messenger.Application.Services
             Guid chatGuid = Guid.Parse(chatId);
 
             return await _chatRepository.IsChatOwner(userGuid, chatGuid);
-            
         }
 
         public async Task<Guid> RemoveMember(string memberId, string chatId)
@@ -71,7 +180,25 @@ namespace Messenger.Application.Services
             Guid memberGuid = Guid.Parse(memberId);
 
             return await _chatRepository.RemoveMember(memberGuid, chatGuid);
+        }
 
+        public async Task<string> ChangeChatName(string newChatName, string chatId)
+        {
+            Guid chatGuid = Guid.Parse(chatId);
+            return await _chatRepository.ChangeChatName(newChatName, chatGuid);
+        }
+
+        public async Task<List<User>> AddMembers(string[] memberIds, string chatId)
+        {
+            Guid chatGuid = Guid.Parse(chatId);
+            List<Guid> userGuids = memberIds.Select(Guid.Parse).ToList();
+
+            var chatMembers = await _userRepository.GetUsersWithAvatars(userGuids);
+            if (userGuids.Count != chatMembers.Count) throw new ArgumentException("One or more users not found.");
+
+            await _chatRepository.AddMembers(chatGuid, userGuids);
+
+            return chatMembers;
         }
     }
 }

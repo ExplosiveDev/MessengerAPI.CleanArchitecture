@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.Execution;
 using Messenger.Core.Models;
 using Messenger.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,16 @@ namespace Messenger.DataAccess.Repositories
             _context = context;
             _mapper = mapper;
         }
+        public async Task<List<GroupChat>> GetGroupChatsByGroupName(string groupName)
+        {
+            var groupChatsEntity = await _context.Chats
+                .OfType<GroupChatEntity>()
+                .Include(gc => gc.ActiveIcon)
+                .Where(gc => gc.GroupName.Contains(groupName))
+                .ToListAsync();
 
+            return _mapper.Map<List<GroupChat>>(groupChatsEntity);
+        }
         private async Task GetDefaultGroupIcon(GroupChatEntity userEntity)
         {
             var defaultAvatar = await _context.Files.FirstOrDefaultAsync(f => f.FileName == "groups.png");
@@ -29,7 +39,7 @@ namespace Messenger.DataAccess.Repositories
                 userEntity.ActiveIconId = defaultAvatar.Id;
             }
         }
-        private async Task<(Message, int)> GetLastMessage(Guid chatId, Guid userId)
+        public async Task<(Message, int)> GetLastMessageAndCountOfUnreaded(Guid chatId, Guid userId)
         {
 
             //*При викорисатнні await з ToListAsync вилітає Exeption
@@ -56,154 +66,12 @@ namespace Messenger.DataAccess.Repositories
             };
             return (resultMessage, unreadCount);
         }
-
-        public async Task<SearchedChats> GetSavedChats(Guid userId)
-        {
-            var userChatEntities = await _context.UserChats
-                .Where(uc => uc.UserId == userId)
-                .ToListAsync();
-
-            var chatIds = userChatEntities.Select(uc => uc.ChatId).ToList();
-
-            var privateChatsEntity = await _context.Chats
-                .OfType<PrivateChatEntity>()
-                .Where(c => chatIds.Contains(c.Id))
-                .Include(c => c.User1)
-                .ThenInclude(c => c.ActiveAvatar)
-                .Include(c => c.User2)
-                .ThenInclude(c => c.ActiveAvatar)
-                .AsNoTracking()
-                .ToListAsync();
-
-            var groupChatsEntity = await _context.Chats
-                .OfType<GroupChatEntity>()
-                .Where(c => chatIds.Contains(c.Id))
-                .Include(gc => gc.ActiveIcon)
-                .Include(gc => gc.UserChats)
-                .ThenInclude(uc => uc.User)
-                .ThenInclude(u => u.ActiveAvatar)
-                .AsNoTracking()
-                .ToListAsync();
-
-            SearchedChats savedChats = new SearchedChats()
-            {
-                PrivateChats = _mapper.Map<List<PrivateChat>>(privateChatsEntity),
-                GroupChats = _mapper.Map<List<GroupChat>>(groupChatsEntity)
-            };
-
-            if (savedChats.PrivateChats.Count > 0)
-            {
-                savedChats.PrivateChats.ForEach(async (PrivateChat chat) =>
-                {
-                    var cortage = await GetLastMessage(chat.Id, userId);
-                    chat.TopMessage = cortage.Item1;
-                    chat.UnReaded = cortage.Item2;
-                });
-
-            }
-
-            if (savedChats.GroupChats.Count > 0)
-            {
-                savedChats.GroupChats.ForEach(async (GroupChat chat) =>
-                {
-                    var cortage = await GetLastMessage(chat.Id, userId);
-                    chat.TopMessage = cortage.Item1;
-                    chat.UnReaded = cortage.Item2;
-                });
-            }
-
-            return savedChats;
-
-
-        }
-
-        public async Task<SearchedChats> GetGlobalChatsByName(Guid currentUserId, string name)
-        {
-            var currentUserEntity = await _context.Users
-                .Include(c => c.ActiveAvatar)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == currentUserId);
-
-            var usersEntity = await _context.Users
-                .Include(c => c.ActiveAvatar)
-                .AsNoTracking()
-                .Where(u => u.UserName.Contains(name) && u.Id != currentUserId)
-                .ToListAsync();
-
-            List<PrivateChat> privateChats = new List<PrivateChat>();
-            if (usersEntity.Count > 0)
-            {
-                var users = _mapper.Map<List<User>>(usersEntity);
-                var currentUser = _mapper.Map<User>(currentUserEntity);
-
-                foreach (var user in users)
-                {
-                    PrivateChat privateChat = new PrivateChat()
-                    {
-                        Id = Guid.NewGuid(),
-                        User1Id = user.Id,
-                        User1 = user,
-                        User2Id = currentUser.Id,
-                        User2 = currentUser,
-                    };
-                    privateChats.Add(privateChat);
-                }
-            }
-
-            var groupChatsEntity = await _context.Chats
-                .OfType<GroupChatEntity>()
-                .Include(gc => gc.ActiveIcon)
-                .Where(gc => gc.GroupName.Contains(name))
-                .ToListAsync();
-
-            SearchedChats searchedGlobalChats = new SearchedChats()
-            {
-                PrivateChats = privateChats,
-                GroupChats = _mapper.Map<List<GroupChat>>(groupChatsEntity)
-            };
-
-            return searchedGlobalChats;
-        }
-
-        public async Task<Chat> Get(Guid chatId, Guid userId)
-        {
-            var chatEntity = await _context.Chats
-                .Include(c => (c as PrivateChatEntity).User1)
-                .Include(c => (c as PrivateChatEntity).User2)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == chatId);
-
-            Chat resultChat = chatEntity switch
-            {
-                PrivateChatEntity textMsg => _mapper.Map<PrivateChat>(chatEntity),
-                GroupChatEntity mediaMsg => _mapper.Map<GroupChat>(chatEntity),
-                _ => null
-            };
-
-            var cortage = await GetLastMessage(chatId, userId);
-            resultChat.TopMessage = cortage.Item1;
-            resultChat.UnReaded = cortage.Item2;
-
-            return resultChat;
-
-        }
-
         public async Task<PrivateChat> CreatePrivateChat(Guid user1Id, Guid user2Id)
         {
-            var user1 = await _context.Users
-                .Include(u => u.ActiveAvatar)
-                .FirstOrDefaultAsync(u => u.Id == user1Id);
-
-            var user2 = await _context.Users
-                .Include(u => u.ActiveAvatar)
-                .FirstOrDefaultAsync(u => u.Id == user2Id);
-
             var newPrivateChatEntity = new PrivateChatEntity()
             {
                 User1Id = user1Id,
-                User1 = user1,
                 User2Id = user2Id,
-                User2 = user2,
             };
 
             var privateChatEntity = _context.PrivateChats.Add(newPrivateChatEntity).Entity;
@@ -220,90 +88,114 @@ namespace Messenger.DataAccess.Repositories
 
             return _mapper.Map<PrivateChat>(privateChatEntity);
         }
-
         public async Task<Chat> Get(Guid chatId)
         {
-            var chatEntity = await _context.Chats
+            var privateChatEntity = await _context.Chats
+                .OfType<PrivateChatEntity>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == chatId);
+
+            if(privateChatEntity != null)
+            {
+                return _mapper.Map<PrivateChat>(privateChatEntity); 
+            }
+
+            var groupChatEntity = await _context.Chats
+                 .OfType<GroupChatEntity>()
+                 .Include(gc => gc.ActiveIcon)
                  .AsNoTracking()
-                 .FirstOrDefaultAsync(x => x.Id == chatId);
+                 .FirstOrDefaultAsync(c => c.Id == chatId);
 
-            return _mapper.Map<Chat>(chatEntity);
+            if (groupChatEntity != null) 
+            {
+                return _mapper.Map<GroupChat>(groupChatEntity);
+            }
+
+            throw new ArgumentException("Chat is not exist");
+
+
         }
-
-        public async Task<GroupChat> CreateGroupChat(Guid ownerId, List<Guid> userIds, string groupName)
+        public async Task<List<Guid>> GetChatUserIds(Guid chatId)
         {
-            var owner = await _context.Users
-                .Include(u => u.ActiveAvatar)
-                .FirstOrDefaultAsync(u => u.Id == ownerId);
-
-            if (owner == null)
-                throw new ArgumentException("Owner not found.");
-
-            var users = await _context.Users
-                .Include(u => u.ActiveAvatar)
-                .Where(u => userIds.Contains(u.Id))
+            return await _context.UserChats
+                .Where(uc => uc.ChatId == chatId)
+                .Select(uc => uc.UserId)
                 .ToListAsync();
+        }
+        public async Task<List<Guid>> GetUserChatIds(Guid userId)
+        {
+            return await _context.UserChats
+                .Where(uc => uc.UserId == userId)
+                .Select(uc => uc.ChatId)
+                .ToListAsync();
+        }
+        public async Task AddMember(Guid chatId, Guid userId)
+        {
+            _context.UserChats.Add(new UserChatEntity { ChatId = chatId, UserId = userId });
+            await _context.SaveChangesAsync();
+        }
+        public async Task AddMembers(Guid chatId, List<Guid> userIds)
+        {
+            var userChatEntities = userIds.Select(u => new UserChatEntity
+            {
+                ChatId = chatId,
+                UserId = u,
+            }).ToList();
 
-            if (users.Count != userIds.Count)
-                throw new ArgumentException("One or more users not found.");
+            _context.UserChats.AddRange(userChatEntities);
 
-            users.Add(owner);
+            await _context.SaveChangesAsync();
 
+        }
+        public async Task<GroupChat> CreateGroupChat(Guid ownerId, string groupName)
+        {
             var newGroupChatEntity = new GroupChatEntity()
             {
-                Admin = owner,
                 AdminId = ownerId,
                 GroupName = groupName,
-                
             };
             await GetDefaultGroupIcon(newGroupChatEntity);
 
             var groupChatEntity = _context.GroupChat.Add(newGroupChatEntity).Entity;
 
-            var userChatEntities = users.Select(u => new UserChatEntity
-            {
-                ChatId = groupChatEntity.Id,
-                UserId = u.Id,
-                User = u
-            }).ToList();
-
-            _context.UserChats.AddRange(userChatEntities);
-            await _context.SaveChangesAsync();
-
             var groupChat = _mapper.Map<GroupChat>(groupChatEntity);
-            groupChat.UserChats = _mapper.Map<List<UserChat>>(userChatEntities);
 
             return groupChat;
         }
-
         public async Task<bool> IsChatOwner(Guid userId, Guid chatId)
         {
-            var chatOwnerId = _context.GroupChat
+            var groupChat = _context.GroupChat
                 .AsNoTracking()
-                .Include(c => c.Admin)
-                .FirstOrDefault(c => c.Id == chatId)
-                 .AdminId;
+                .FirstOrDefault(c => c.Id == chatId);
 
-            if(chatOwnerId == userId) return true;
+            if (groupChat != null && groupChat.AdminId == userId) return true;
             return false;
         }
-
         public async Task<Guid> RemoveMember(Guid memberId, Guid chatId)
         {
+            var chatEntity = _context.UserChats
+                .FirstOrDefault(uc => uc.UserId == memberId && uc.ChatId == chatId);
+
+            if(chatEntity == null) return Guid.Empty;
+
+            _context.UserChats.Remove(chatEntity);
+            await _context.SaveChangesAsync();
+
+            return memberId;
+        }
+        public async Task<string> ChangeChatName(string newChatName, Guid chatId)
+        {
             var chatEntity = _context.GroupChat
-                .Include(c => c.UserChats)
                 .FirstOrDefault(c => c.Id == chatId);
 
             if (chatEntity == null)
                 throw new Exception("Chat not found");
 
-            var userChat = chatEntity.UserChats.FirstOrDefault(uc => uc.UserId == memberId);
-            if (userChat == null) return memberId;
-
-            chatEntity.UserChats.Remove(userChat);
+            chatEntity.GroupName = newChatName;
 
             await _context.SaveChangesAsync();
-            return memberId;
+
+            return chatEntity.GroupName;
         }
     }
 }

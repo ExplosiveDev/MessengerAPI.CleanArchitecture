@@ -18,7 +18,50 @@ namespace Messenger.DataAccess.Repositories
 			_context = context;
 			_mapper = mapper;
 		}
-		public async Task Add(User user)
+        public async Task<User> GetUserWithAvatar(Guid userId)
+        {
+            var userEntity = await _context.Users
+                .Include(x => x.ActiveAvatar)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == userId) ?? throw new Exception();
+
+            ICollection<string> roles = [];
+
+            foreach (var role in userEntity.Roles)
+                roles.Add(role.Name);
+
+
+            if (userEntity.ActiveAvatar == null)
+            {
+                await GetDefaultAvatar(userEntity);
+            }
+
+            if (userEntity != null)
+                return _mapper.Map<User>(userEntity);
+
+            return null;
+        }
+        public async Task<List<User>> GetUsersWithAvatars(List<Guid> userIds)
+        {
+            var users = new List<User>();
+            foreach (var userId in userIds)
+            {
+                users.Add(await GetUserWithAvatar(userId));
+            }
+            return users;
+        }
+        public async Task<List<User>> GetUsersByNameWithAvatar(string name)
+        {
+            var userEntity = await _context.Users
+                .Include(x => x.ActiveAvatar)
+                .AsNoTracking()
+                .Where(u => u.UserName.Contains(name))
+                .ToListAsync();
+
+            return _mapper.Map<List<User>>(userEntity);
+
+        }
+        public async Task Add(User user)
 		{
 
 			var role = _context.Roles.FirstOrDefault(x => x.Id == (int)Role.User);
@@ -77,30 +120,9 @@ namespace Messenger.DataAccess.Repositories
 
 			return null;
 		}
-		public async Task<User> GetById(Guid userId)
-		{
-			var userEntity = await _context.Users
-				.Include(x => x.ActiveAvatar)
-				.AsNoTracking()
-				.FirstOrDefaultAsync(x => x.Id == userId) ?? throw new Exception();
+		
 
-			ICollection<string> roles = [];
-
-			foreach (var role in userEntity.Roles)
-				roles.Add(role.Name);
-
-
-            if (userEntity.ActiveAvatar == null)
-            {
-                await GetDefaultAvatar(userEntity);
-            }
-
-            if (userEntity != null)
-				return _mapper.Map<User>(userEntity);
-
-            return null;
-		}
-		public async Task<bool> IsUniquePhone(string phone)
+        public async Task<bool> IsUniquePhone(string phone)
 		{
 			var user = await _context.Users
 				.AsNoTracking()
