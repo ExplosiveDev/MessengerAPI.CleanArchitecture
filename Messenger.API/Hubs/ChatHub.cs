@@ -69,7 +69,7 @@ namespace Messenger.API.Hubs
         }
         public async Task RemoveChat(removeChatPayload data)
         {
-            Connection connection = await _connectionService.GetConnectionByUserId(data.userId);
+            Connection connection = await _connectionService.GetUserConnection(data.userId);
             if (connection is not null) {
                 await Clients.Client(connection.ConnectionId).ReceiveRemovedChatId(data.chatId);
             }
@@ -93,7 +93,7 @@ namespace Messenger.API.Hubs
             List<Connection> connections = [];
             foreach (var memberId in data.newMemberIds)
             {
-                connections.Add(await _connectionService.GetConnectionByUserId(memberId));
+                connections.Add(await _connectionService.GetUserConnection(memberId));
             }
 
             if (connections is not null)

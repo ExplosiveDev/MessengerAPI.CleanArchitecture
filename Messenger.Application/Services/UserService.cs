@@ -60,6 +60,7 @@ namespace Messenger.Application.Services
 		public async Task<User> Get(string userId)
 		{
             var userGuid = Guid.Parse(userId);
+            if (!await _userRepository.IsUserExists(userGuid)) throw new ArgumentException("Користувач не знайдений", nameof(userGuid));
             return await _userRepository.GetUserWithAvatar(userGuid);
 		}
 		public async Task<List<User>> SearchByUserName(string userName)

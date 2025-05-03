@@ -19,15 +19,6 @@ namespace Messenger.DataAccess.Repositories
 			_context = context;
 			_mapper = mapper;
 		}
-        public async Task<List<User>> GetMessageRecipientsAsync(Guid chatId)
-        {
-            var users = await _context.UserChats
-                .Where(uc => uc.ChatId == chatId)
-                .Select(uc => uc.User)
-                .ToListAsync();
-
-            return _mapper.Map<List<User>>(users);			
-        }
         public async Task CreateConnection(Connection connection)
 		{
 			var connectionEntity = await _context.Connections
@@ -35,11 +26,9 @@ namespace Messenger.DataAccess.Repositories
 
 			if (connectionEntity != null)
 			{
-				// Якщо потрібно оновити інші поля
-				// Оновлюйте лише ті, що не є PK
-				_context.Connections.Remove(connectionEntity); // Видалення старого запису
-				connectionEntity = _mapper.Map<ConnectionEntity>(connection); // Створення нового з новим ConnectionId
-				await _context.Connections.AddAsync(connectionEntity); // Додавання нового запису
+				_context.Connections.Remove(connectionEntity); 
+				connectionEntity = _mapper.Map<ConnectionEntity>(connection);
+				await _context.Connections.AddAsync(connectionEntity);
 			}
 			else
 			{
@@ -51,7 +40,7 @@ namespace Messenger.DataAccess.Repositories
 		}
 
 
-		public async Task DeleteConnection(Guid userId)
+		public async Task DeleteUserConnection(Guid userId)
 		{
 			var connectionEntity = _context.Connections.FirstOrDefault(x => x.UserId == userId);
 			if (connectionEntity != null)
@@ -61,11 +50,10 @@ namespace Messenger.DataAccess.Repositories
 			}
 		}
 
-		public async Task<List<Connection>> GetConnections(Guid chatId)
+		public async Task<List<Connection>> GetChatConnections(List<Guid> userIds)
 		{
-            var usersIds = (await GetMessageRecipientsAsync(chatId)).Select(u => u.Id).ToList();
             var connectionsEntity = await _context.Connections
-				.Where(x => usersIds.Contains(x.UserId))
+				.Where(x => userIds.Contains(x.UserId))
 				.ToListAsync(); 
 
             return _mapper.Map<List<Connection>>(connectionsEntity);
@@ -76,6 +64,7 @@ namespace Messenger.DataAccess.Repositories
 			var connectionEntity = _context.Connections
 				.AsNoTracking()
 				.FirstOrDefault(x => x.ConnectionId == connectionId);
+
 			return _mapper.Map<Connection>(connectionEntity);
 		}
 

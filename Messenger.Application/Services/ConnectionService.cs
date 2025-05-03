@@ -1,4 +1,5 @@
-﻿using Messenger.Core.Models;
+﻿using Messenger.Core.Abstractions;
+using Messenger.Core.Models;
 using Messenger.DataAccess.Repositories;
 using System;
 using System.Collections.Generic;
@@ -11,25 +12,33 @@ namespace Messenger.Application.Services
 	public class ConnectionService : IConnectionService
 	{
 		private readonly IConnectionRepository _connectionRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IChatRepository _chatRepository;
 
-		public ConnectionService(IConnectionRepository connectionRepository)
+        public ConnectionService(IConnectionRepository connectionRepository, IUserRepository userRepository, IChatRepository chatRepository)
 		{
 			_connectionRepository = connectionRepository;
+			_userRepository = userRepository;
+			_chatRepository = chatRepository;
 		}
 
-		public async Task CreateConnection(Guid userId, string connectionId, string stringConnection)
+		public async Task CreateConnection(Guid userGuid, string connectionId, string stringConnection)
 		{
-			await _connectionRepository.CreateConnection(Connection.Create(userId, connectionId, stringConnection));
+            if (!await _userRepository.IsUserExists(userGuid)) throw new ArgumentException("Користувач не знайдений", nameof(userGuid));
+
+            await _connectionRepository.CreateConnection(Connection.Create(userGuid, connectionId, stringConnection));
 		}
 
-		public async Task DeleteConnection(Guid userId)
+		public async Task DeleteConnection(Guid userGuid)
 		{
-			await _connectionRepository.DeleteConnection(userId);
+            await _connectionRepository.DeleteUserConnection(userGuid);
 		}
 
-		public async Task<List<Connection>> GetConnections(Guid chatId)
+		public async Task<List<Connection>> GetConnections(Guid chatGuid)
 		{
-			return await _connectionRepository.GetConnections(chatId);
+            var userIds = await _chatRepository.GetChatUserIds(chatGuid);
+
+			return await _connectionRepository.GetChatConnections(userIds);
 		}
 
 		public async Task<Connection> GetConnection(string connectionId)
@@ -37,10 +46,11 @@ namespace Messenger.Application.Services
 			return await _connectionRepository.GetConnection(connectionId);
 		}
 
-        public async Task<Connection> GetConnectionByUserId(string userId)
+        public async Task<Connection> GetUserConnection(string userId)
         {
             var userGuid = Guid.Parse(userId);
-			return await _connectionRepository.GetConnectionByUserId(userGuid);
+            if (!await _userRepository.IsUserExists(userGuid)) throw new ArgumentException("Користувач не знайдений", nameof(userGuid));
+            return await _connectionRepository.GetConnectionByUserId(userGuid);
         }
     }
 }
