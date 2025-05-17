@@ -86,10 +86,23 @@ namespace Messenger.DataAccess.Repositories
             var mediaMessagesEntity = await _context.Messages
                 .OfType<MediaMessageEntity>()
                 .Where(m => messageIds.Contains(m.Id))
+                .Include(m => m.Content)
                 .AsNoTracking()
                 .ToListAsync();
 
             return _mapper.Map<List<MediaMessage>>(mediaMessagesEntity);
+        }
+
+        public async Task<Guid> RemoveMessage(Guid messageId)
+        {
+            var messageEntity = await _context.Messages
+                .FirstOrDefaultAsync(m => m.Id == messageId);
+
+            _context.Remove(messageEntity);
+
+            await _context.SaveChangesAsync();
+
+            return messageId;
         }
 
         public async Task SetIsReaded(List<Guid> ids)
@@ -101,6 +114,31 @@ namespace Messenger.DataAccess.Repositories
             messagesEntity.ForEach((MessageEntity msg) => { msg.IsReaded = true; });
 
             await _context.SaveChangesAsync();
+
+        }
+
+        public async Task<bool> IsMessageExists(Guid messageId) => await _context.Messages.AnyAsync(c => c.Id == messageId);
+
+        public async Task<bool> IsMessageSender(Guid messageId, Guid userId)
+        {
+            var messageEntity = await _context.Messages
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == messageId);
+
+            return messageEntity.SenderId == userId;
+        }
+
+        public async Task<string> EditTextMessageContent(Guid messageId, string newContent)
+        {
+            var messageEntity = await _context.TextMessages
+                .FirstOrDefaultAsync(m => m.Id == messageId);
+
+            messageEntity.Content = newContent;
+
+            await _context.SaveChangesAsync();
+
+            return newContent;
+
 
         }
     }

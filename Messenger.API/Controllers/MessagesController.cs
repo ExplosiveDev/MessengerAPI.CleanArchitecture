@@ -69,5 +69,43 @@ namespace Messenger.API.Controllers
             return Ok(mediaMessage);
 
         }
+        [Authorize]
+        [HttpPost("RemoveMessage")]
+        public async Task<ActionResult<Message>> RemoveMessage([FromBody] string messageId)
+        {
+            var userId = User.FindFirst("userId")?.Value;
+
+            if (userId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            var removedMessageId = await _messageService.RemoveMessage(messageId, userId);
+
+            if (removedMessageId == Guid.Empty) return BadRequest();
+
+            return Ok(removedMessageId);
+
+        }
+
+        [Authorize]
+        [HttpPost("EditTextMessage")]
+        public async Task<ActionResult<Message>> EditTextMessage([FromBody] EditTextMessageRequest data)
+        {
+            var userId = User.FindFirst("userId")?.Value;
+
+            if (userId == null)
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            var newTextMessageContent = await _messageService.EditTextMessage(data.textMessageId, userId, data.newTextMessageContent);
+
+            if (newTextMessageContent is null || newTextMessageContent == string.Empty) return BadRequest();
+
+            return Ok(newTextMessageContent);
+
+        }
+
     }
 }

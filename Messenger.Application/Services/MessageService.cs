@@ -81,5 +81,34 @@ namespace Messenger.Application.Services
 
             await _messageRepository.SetIsReaded(msgIdsToRead);
         }
+        public async Task<string> EditTextMessage(string messageId, string userId, string newTextMessageContent)
+        {
+            var messageGuid = Guid.Parse(messageId);
+            var userGuid = Guid.Parse(userId);
+
+            if(! await _messageRepository.IsMessageExists(messageGuid))
+                throw new ArgumentException("Повідомлення не знайдено", nameof(messageGuid));
+
+            if(! await _messageRepository.IsMessageSender(messageGuid, userGuid))
+                throw new ArgumentException("Немає прав редагувати це повідомлення", nameof(messageGuid));
+
+            var message = await _messageRepository.EditTextMessageContent(messageGuid, newTextMessageContent);
+
+            return message;
+
+        }
+        public async Task<Guid> RemoveMessage (string messageId, string userId)
+        {
+            var messageGuid = Guid.Parse(messageId);
+            var userGuid = Guid.Parse(userId);
+
+            if (!await _messageRepository.IsMessageExists(messageGuid))
+                throw new ArgumentException("Повідомлення не знайдено", nameof(messageGuid));
+
+            if (!await _messageRepository.IsMessageSender(messageGuid, userGuid))
+                throw new ArgumentException("Немає прав редагувати це повідомлення", nameof(messageGuid));
+
+            return await _messageRepository.RemoveMessage(messageGuid);
+        }
     }
 }

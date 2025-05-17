@@ -8,6 +8,7 @@ namespace Messenger.Application.Services
         Task<TextMessage> AddTextMessage(string content, string chatId, string senderId);
 		Task<SearchedMessages> GetMessagesByChatId(Guid chatId);
 		Task SetIsReaded(List<string> msgIds);
-
+		Task<string> EditTextMessage(string messageId, string chatId, string newTextMessageContent);
+        Task<Guid> RemoveMessage(string messageId, string userId);
     }
 }

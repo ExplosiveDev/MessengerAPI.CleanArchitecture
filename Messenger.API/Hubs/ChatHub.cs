@@ -11,6 +11,8 @@ namespace Messenger.API.Hubs
     public record removeChatPayload(string chatId, string userId);
     public record changeChatName(string chatId, string newChatName);
     public record sendNewChat(string chatId, List<string> newMemberIds);
+    public record editTextMessage(string messageId, string chatId, string newMessageContent);
+    public record removeMessage(string messageId, string chatId);
     public interface IChatClient
     {
         public Task ReceiveMessage(Message message, int status);
@@ -19,6 +21,8 @@ namespace Messenger.API.Hubs
         public Task ReceiveRemovedChatId(string chatId);
         public Task ReceiveNewChatName(string chatId, string newChatName);
         public Task ReceiveNewChat(string chatId);
+        public Task ReceiveEditedMessage(string messageId, string chatId, string newMessageContent);
+        public Task ReceiveRemovedMessage(string messageId);
     }
     public class ChatHub : Hub<IChatClient>
     {
@@ -83,6 +87,30 @@ namespace Messenger.API.Hubs
                 foreach (var connection in connections)
                 {
                     await Clients.Client(connection.ConnectionId).ReceiveNewChatName(data.chatId, data.newChatName);
+                }
+            }
+        }
+
+        public async Task EditMessage(editTextMessage data)
+        {
+            List<Connection> connections = await _connectionService.GetConnections(Guid.Parse(data.chatId));
+            if (connections is not null)
+            {
+                foreach (var connection in connections)
+                {
+                    await Clients.Client(connection.ConnectionId).ReceiveEditedMessage(data.messageId, data.chatId, data.newMessageContent);
+                }
+            }
+        }
+
+        public async Task RemoveMessage(removeMessage data)
+        {
+            List<Connection> connections = await _connectionService.GetConnections(Guid.Parse(data.chatId));
+            if (connections is not null)
+            {
+                foreach (var connection in connections)
+                {
+                    await Clients.Client(connection.ConnectionId).ReceiveRemovedMessage(data.messageId);
                 }
             }
         }
